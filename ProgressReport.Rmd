@@ -64,14 +64,14 @@ digraph SEIQHRF {
   node [shape = box,
         fontname = Helvetica]
   S[label='S=Susceptible'];
-  P[label='P=Preventative Isolation, \n not infected and not infectious', color='red'];
+  P[label='P=Preventative Isolation, \n not infected and not infectious', color='green'];
   E[label='E=Exposed and infected,\nasymptomatic,\npotentially infectious'];
   I[label='I=Symptomatic and/or test-positive,\ninfected and infectious'];
   Q[label='Q=Case isolated\n(infectious)'];
   H[label='H=Requires\nhospitalisation\n(hospitalised if\ncapacity not exceeded'];
   R[label='R=Recovered/immune'];
   F[label='F=Case fatality']
-  A[label='A=Asymptomatic Isolation, \n infected, isolated', color='red']
+  A[label='A=Asymptomatic Isolation, \n infected, isolated', color='green']
   # several 'edge' statements
   S->E
   I->S[style='dashed']
@@ -85,14 +85,18 @@ digraph SEIQHRF {
   H->R
   Q->R
   Q->H
-  E->R[color='blue']
-  S->P[color='red']
-  P->S[color='red']
   P->A[color='red']
-  E->A[color='red']
-  A->Q[color='red']
+  E->R[color='green']
+  S->P[color='green']
+  P->S[color='green']
+  E->A[color='green']
+  A->Q[color='yellow']
   A->R[color='blue']
-  A->S[color='red',style='dashed']
+  A->S[color='purple',style='dashed']
+  I->P[color='red',style='dashed']
+  E->P[color='red',style='dashed']
+  A->P[color='red',style='dashed']
+  Q->P[color='red',style='dashed']
 }
 ")
 ```
@@ -148,9 +152,9 @@ simulate <- function(# control.icm params
                      arrivals.FUN = arrivals.icm,
                      get_prev.FUN = get_prev.seiqhrf.icm,
                      # init.icm params
-                     s.num = 9996, # 999970
-                     e.num=0,
-                     i.num = 4, # 30
+                     s.num = 9800, # 999970
+                     e.num= 200,
+                     i.num = 0, # 30
                      q.num=0,
                      h.num=0,
                      r.num = 0,
@@ -173,8 +177,8 @@ simulate <- function(# control.icm params
                      rec.rate = 1/20,
                      rec.dist.scale = 35,
                      rec.dist.shape = 1.5,
-                     rec.rate.e = 1/20, #NEW Odds each day that an asymptomatic person recovers
-                     rec.e.dist.scale = 35,#NEW
+                     rec.rate.e = 1/10, #NEW Odds each day that an asymptomatic person recovers
+                     rec.e.dist.scale = 15, #NEW
                      rec.e.dist.shape = 1.5, #NEW
                      fat.rate.base = 1/50,
                      hosp.cap = 40*hc_scaler, # 4000 replace red ref line too
@@ -191,6 +195,12 @@ simulate <- function(# control.icm params
                      dq.rate = (7/365)/1000,
                      dh.rate = (20/365)/1000,
                      dr.rate = (7/365)/1000,
+                     con.agg = 5,
+                     con.acc = .03,
+                     con.dist.scale = 14,
+                     con.dist.shape = 5,
+                     prog.a.dist.scale = 5,
+                     prog.a.dist.shape = 1.5,
                      out="mean"
                     ) {
 
@@ -248,7 +258,13 @@ simulate <- function(# control.icm params
                       di.rate = di.rate,
                       dq.rate = dq.rate,
                       dh.rate = dh.rate,
-                      dr.rate = dr.rate)
+                      dr.rate = dr.rate,
+                      con.agg = con.agg,
+                      con.acc = con.acc,
+                      con.dist.scale = con.dist.scale,
+                      con.dist.shape = con.dist.shape,
+                      prog.a.dist.scale = prog.a.dist.scale,
+                      prog.a.dist.shape = prog.a.dist.shape)
 
   sim <- icm.seiqhrf(param, init, control)
   sim_df <- as.data.frame(sim, out=out)
@@ -262,6 +278,11 @@ baseline_sim <- simulate(ncores=1)
 ```
 
 Let's visualise the results as a set of time-series of the daily count of our 100,000 individuals in each compartment.
+
+```{r eval=TRUE, echo=FALSE, message=FALSE, warning=FALSE}
+baseline_sim$df['a.num']
+```
+
 
 ```{r, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
 baseline_plot_df <- baseline_sim$df %>%

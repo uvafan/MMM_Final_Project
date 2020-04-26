@@ -764,74 +764,111 @@ progress.seiqhrf.icm <- function(dat, at) {
   
   
   #START OF NEW STUFF
-  #rec.rand <- dat$control$rec.rand
+  
+  # Recovery of asymptomatic
   rec.rate.e <- dat$param$rec.rate.e
   rec.e.dist.scale <- dat$param$rec.e.dist.scale
   rec.e.dist.shape <- dat$param$rec.e.dist.shape
-  
-  nRecove <- nRecoveG2 <- 0
+
+  nRecove <- 0
   idsElig <- which(active == 1 & (status == "e"))
   nElig <- length(idsElig)
   idsRecove <- numeric(0)
   
   if (nElig > 0) {
     
-    gElig <- group[idsElig]
-    rates <- c(rec.rate.e, rec.rate.g2)
-    ratesElig <- rates[gElig]
-    
-    if (rec.rand == TRUE) {
-      vecRecove <- which(rbinom(nElig, 1, ratesElig) == 1)
-      if (length(vecRecov) > 0) {
-        idsRecove <- idsElig[vecRecove]
-        nRecove <- sum(group[idsRecove] == 1)
-        nRecoveG2 <- sum(group[idsRecove] == 2)
-        status[idsRecove] <- recovState
-      }
-    } else {
-      vecTimeSinceExp <- at - dat$attr$expTime[idsElig]
-      vecTimeSinceExp[is.na(vecTimeSinceExp)] <- 0
-      gammaRatesElig <- pweibull(vecTimeSinceExp, rec.e.dist.shape, scale=rec.e.dist.scale) 
-      nRecove <- round(sum(gammaRatesElig[gElig == 1], na.rm=TRUE))
-      if (nRecove > 0) {
-        idsRecove <- ssample(idsElig[gElig == 1], 
-                            nRecove, prob = gammaRatesElig[gElig == 1])
-        status[idsRecove] <- recovState
-        # debug
-        if (FALSE & at <= 30) {
-          print(paste("at:", at))
-          print("idsElig:")
-          print(idsElig[gElig == 1])
-          print("vecTimeSinceExp:")
-          print(vecTimeSinceExp[gElig == 1])
-          print("gammaRatesElig:")
-          print(gammaRatesElig)
-          print(paste("nRecov:",nRecove))
-          print(paste("sum of elig rates:", round(sum(gammaRatesElig[gElig == 1]))))
-          print(paste("sum(gElig == 1):", sum(gElig == 1)))
-          print("ids recovered:")
-          print(idsRecove)
-          print("probs of ids to be progressed:")
-          print(gammaRatesElig[which(idsElig %in% idsRecove)]) 
-          print("days since exposed of ids to be Recovered:")
-          print(vecTimeSinceExp[which(idsElig %in% idsRecove)]) 
-          print("------")
-        }  
-        
-      }
-      if (groups == 2) {
-        nRecovG2 <- round(sum(gammaRatesElig[gElig == 2], na.rm=TRUE))
-        if (nRecovG2 > 0) {
-          idsRecovG2 <- ssample(idsElig[gElig == 2], 
-                                nRecovG2, prob = gammaRatesElig[gElig == 2])
-          status[idsRecovG2] <- recovState
-          idsRecov <- c(idsRecov, idsRecovG2)
-        }
-      }
+    vecTimeSinceExp <- at - dat$attr$expTime[idsElig]
+    vecTimeSinceExp[is.na(vecTimeSinceExp)] <- 0
+    gammaRatesElig <- pweibull(vecTimeSinceExp, rec.e.dist.shape, scale=rec.e.dist.scale) 
+    nRecove <- round(sum(gammaRatesElig, na.rm=TRUE))
+    if (nRecove > 0) {
+      idsRecove <- ssample(idsElig, 
+                          nRecove, prob = gammaRatesElig)
+      status[idsRecove] <- recovState
     }
   }
+  
   dat$attr$status <- status
   dat$attr$recovTime[idsRecove] <- at
+  
+  # ----- contact tracing ------- 
+  con.agg <- dat$param$con.agg
+  con.acc <- dat$param$con.acc
+
+  idsSuscep <- which(active ==1 & status == 's')
+  nSuscep <- length(idsSuscep)
+  idsExposed <- which(active ==1 & status == 'e')
+  nExposed <- length(idsExposed)
+  totalSE <- nSuscep + nExposed
+  nTrace <- min(totalSE, nProg * con.agg)
+  idsTraceS <- numeric(0)
+    
+  if(nTrace > 0) {
+    accuracy <- con.acc + ((1- con.acc) * nExposed/totalSE)
+    
+    nTraceS <- min(rbinom(1,nTrace,1-accuracy), nSuscep)
+    nTraceE <- min(nTrace - nTraceS, nExposed)
+    
+    #nTraceS <- min(round((1-accuracy) * nTrace), nSuscep)
+    #nTraceE <- min(round(accuracy * nTrace), nExposed)
+    
+    idsTraceS <-  ssample(idsSuscep, nTraceS)
+    idsTraceE <-  ssample(idsExposed, nTraceE)
+    
+    status[idsTraceS] <- 'p'
+    status[idsTraceE] <- 'e'
+  }
+  
+  dat$attr$status <- status
+  dat$attr$traceTime[idsTraceS] <- at
+  
+  # Going out of self-isolation
+  con.dist.scale <- dat$param$con.dist.scale
+  con.dist.shape <- dat$param$con.dist.shape
+  
+  nReturn <- 0
+  idsElig <- which(active == 1 & (status == "p"))
+  nElig <- length(idsElig)
+  idsReturn <- numeric(0)
+  
+  if (nElig > 0) {
+    vecTimeSinceExp <- at - dat$attr$traceTime[idsElig]
+    vecTimeSinceExp[is.na(vecTimeSinceExp)] <- 0
+    gammaRatesElig <- pweibull(vecTimeSinceExp, con.dist.shape, scale=con.dist.scale) 
+    nReturn <- round(sum(gammaRatesElig, na.rm=TRUE))
+    if (nReturn > 0) {
+      idsReturn <- ssample(idsElig, 
+                           nReturn, prob = gammaRatesElig)
+      status[idsReturn] <- 's'
+    }
+  }
+  
+  dat$attr$status <- status
+
+  # Onset of symptoms for isolated
+  prog.a.dist.scale <- dat$param$prog.a.dist.scale
+  prog.a.dist.shape <- dat$param$prog.a.dist.shape
+  
+  nProgA <- 0
+  idsElig <- which(active == 1 & (status == "a"))
+  nElig <- length(idsElig)
+  idsProgA <- numeric(0)
+  
+  if (nElig > 0) {
+    print(nElig)
+    vecTimeSinceExp <- at - dat$attr$expTime[idsElig]
+    vecTimeSinceExp[is.na(vecTimeSinceExp)] <- 0
+    gammaRatesElig <- pweibull(vecTimeSinceExp, prog.a.dist.shape, scale=prog.a.dist.scale) 
+    nProgA <- round(sum(gammaRatesElig, na.rm=TRUE))
+    if (nProgA > 0) {
+      idsProgA <- ssample(idsElig, 
+                           nProgA, prob = gammaRatesElig)
+      status[idsProgA] <- "q"
+    }
+  }
+  
+  dat$attr$status <- status
+  dat$attr$infTime[idsProgA] <- at
   
   #END OF NEW STUFF
   

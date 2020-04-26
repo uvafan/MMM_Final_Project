@@ -7,6 +7,7 @@ saveout.seiqhrf.icm <- function(dat, s, out = NULL) {
         alist$quarTime <- dat$attr$quarTime
         alist$recovTime <- dat$attr$recovTime
         alist$hospTime <- dat$attr$hospTime
+        alist$traceTime <- dat$attr$traceTime
         alist$dischTime <- dat$attr$dischTime
         alist$fatTime <- dat$attr$fatTime
         alist <- lapply(alist, `length<-`, max(lengths(alist)))

@@ -434,7 +434,8 @@ arrivals.seiqhrf.icm <- function(dat, at) {
   dat$attr$expTime <- c(dat$attr$expTime, rep(NA, totArrivals))
   dat$attr$infTime <- c(dat$attr$infTime, rep(NA, totArrivals))
   dat$attr$quarTime <- c(dat$attr$quarTime, rep(NA, totArrivals))
-  dat$attr$hospTime <- c(dat$attr$ihospTime, rep(NA, totArrivals))
+  dat$attr$hospTime <- c(dat$attr$hospTime, rep(NA, totArrivals))
+  dat$attr$traceTime <- c(dat$attr$traceTime, rep(NA, totArrivals))
   dat$attr$recovTime <- c(dat$attr$recovTime, rep(NA, totArrivals))
   dat$attr$fatTime <- c(dat$attr$fatTime, rep(NA, totArrivals))
 
@@ -451,7 +452,7 @@ arrivals.seiqhrf.icm <- function(dat, at) {
     dat$attr$expTime <- c(dat$attr$expTime, rep(NA, totArrivals.g2))
     dat$attr$infTime <- c(dat$attr$infTime, rep(NA, totArrivals.g2))
     dat$attr$quarTime <- c(dat$attr$quarTime, rep(NA, totArrivals.g2))
-    dat$attr$hospTime <- c(dat$attr$ihospTime, rep(NA, totArrivals.g2))
+    dat$attr$hospTime <- c(dat$attr$hospTime, rep(NA, totArrivals.g2))
     dat$attr$recovTime <- c(dat$attr$recovTime, rep(NA, totArrivals.g2))
     dat$attr$fatTime <- c(dat$attr$fatTime, rep(NA, totArrivals.g2))
   }

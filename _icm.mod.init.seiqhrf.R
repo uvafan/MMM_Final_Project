@@ -126,6 +126,10 @@ init_status.icm <- function(dat) {
   idsHosp <- which(status == "h")
   hospTime <- rep(NA, length(status))
   dat$attr$hospTime <- hospTime
+  
+  # Time entered contact tracing ----------------------------------------------------------
+  traceTime <- rep(NA, length(status))
+  dat$attr$hospTime <- traceTime
 
    # Quarantine Time ----------------------------------------------------------
   idsQuar <- which(status == "q")
