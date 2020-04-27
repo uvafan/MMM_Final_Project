@@ -85,18 +85,18 @@ digraph SEIQHRF {
   H->R
   Q->R
   Q->H
-  P->A[color='red']
+  P->A[color='green']
   E->R[color='green']
   S->P[color='green']
   P->S[color='green']
   E->A[color='green']
-  A->Q[color='yellow']
-  A->R[color='blue']
-  A->S[color='purple',style='dashed']
-  I->P[color='red',style='dashed']
-  E->P[color='red',style='dashed']
-  A->P[color='red',style='dashed']
-  Q->P[color='red',style='dashed']
+  A->Q[color='green']
+  A->R[color='green']
+  A->S[color='green',style='dashed']
+  I->P[color='green',style='dashed']
+  E->P[color='green',style='dashed']
+  A->P[color='green',style='dashed']
+  Q->P[color='green',style='dashed']
 }
 ")
 ```
@@ -152,9 +152,9 @@ simulate <- function(# control.icm params
                      arrivals.FUN = arrivals.icm,
                      get_prev.FUN = get_prev.seiqhrf.icm,
                      # init.icm params
-                     s.num = 9800, # 999970
-                     e.num= 200,
-                     i.num = 0, # 30
+                     s.num = 9997, # 999970
+                     e.num= 0,
+                     i.num = 3, # 30
                      q.num=0,
                      h.num=0,
                      r.num = 0,
@@ -168,6 +168,16 @@ simulate <- function(# control.icm params
                      act.rate.i = baseline_act_rate_ei, # 10,
                      inf.prob.q = 0.02, 
                      act.rate.q = 1.5, 
+                     inf.prob.a = 0.01, #NEW
+                     act.rate.a = 1.5, #NEW
+                     inf.prob.ep = 0.02, 
+                     act.rate.ep = baseline_act_rate_ei/2, # 10,
+                     inf.prob.ip = 0.05, 
+                     act.rate.ip = baseline_act_rate_ei/2, # 10,
+                     inf.prob.qp = 0.02, 
+                     act.rate.qp = 1.5/2, 
+                     inf.prob.ap = 0.01, #NEW
+                     act.rate.ap = 1.5/2, #NEW
                      quar.rate = 1/30, 
                      hosp.rate = 1/100,
                      disch.rate = 1/20,
@@ -178,7 +188,7 @@ simulate <- function(# control.icm params
                      rec.dist.scale = 35,
                      rec.dist.shape = 1.5,
                      rec.rate.e = 1/10, #NEW Odds each day that an asymptomatic person recovers
-                     rec.e.dist.scale = 15, #NEW
+                     rec.e.dist.scale = 5, #NEW
                      rec.e.dist.shape = 1.5, #NEW
                      fat.rate.base = 1/50,
                      hosp.cap = 40*hc_scaler, # 4000 replace red ref line too
@@ -201,6 +211,8 @@ simulate <- function(# control.icm params
                      con.dist.shape = 5,
                      prog.a.dist.scale = 5,
                      prog.a.dist.shape = 1.5,
+                     rec.a.dist.scale = 5,
+                     rec.a.dist.shape = 1.5,
                      out="mean"
                     ) {
 
@@ -231,7 +243,17 @@ simulate <- function(# control.icm params
                       inf.prob.i = inf.prob.i, 
                       act.rate.i = act.rate.i,
                       inf.prob.q = inf.prob.q, 
-                      act.rate.q = act.rate.q,                    
+                      act.rate.q = act.rate.q,
+                      inf.prob.a = inf.prob.a, 
+                      act.rate.a = act.rate.a,
+                      inf.prob.ep = inf.prob.ep, 
+                      act.rate.ep = act.rate.ep,
+                      inf.prob.ip = inf.prob.ip, 
+                      act.rate.ip = act.rate.ip, 
+                      inf.prob.qp = inf.prob.qp, 
+                      act.rate.qp = act.rate.qp, 
+                      inf.prob.ap = inf.prob.ap,
+                      act.rate.ap = act.rate.ap, 
                       quar.rate = quar.rate,
                       hosp.rate = hosp.rate,
                       disch.rate = disch.rate,
@@ -264,7 +286,10 @@ simulate <- function(# control.icm params
                       con.dist.scale = con.dist.scale,
                       con.dist.shape = con.dist.shape,
                       prog.a.dist.scale = prog.a.dist.scale,
-                      prog.a.dist.shape = prog.a.dist.shape)
+                      prog.a.dist.shape = prog.a.dist.shape,
+                      rec.a.dist.scale = rec.a.dist.scale,
+                      rec.a.dist.shape = rec.a.dist.shape
+                      )
 
   sim <- icm.seiqhrf(param, init, control)
   sim_df <- as.data.frame(sim, out=out)
@@ -280,7 +305,9 @@ baseline_sim <- simulate(ncores=1)
 Let's visualise the results as a set of time-series of the daily count of our 100,000 individuals in each compartment.
 
 ```{r eval=TRUE, echo=FALSE, message=FALSE, warning=FALSE}
-baseline_sim$df['a.num']
+baseline_sim_1 <-  baseline_sim$df %>%
+  filter(time > 2)
+sum(baseline_sim_1$a.num)
 ```
 
 

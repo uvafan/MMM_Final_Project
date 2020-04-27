@@ -22,7 +22,7 @@ infection.seiqhrf.icm <- function(dat, at) {
       !(length(inf.prob.i.g2) == 1 || length(inf.prob.i.g2 == nsteps))) {
     stop("Length of inf.prob.i.g2 must be 1 or the value of nsteps")
   }
-  if (type %in% c("SEIQHR", "SEIQHRF")) {  
+  if (type %in% c("SEIQHR", "SEIQHRF", "SEIQHRFPA")) {  
     quar.rate <- dat$param$quar.rate
     if (!(length(quar.rate) == 1 || length(quar.rate == nsteps))) {
       stop("Length of quar.rate must be 1 or the value of nsteps")
@@ -43,7 +43,17 @@ infection.seiqhrf.icm <- function(dat, at) {
     }
   }
   
-  if (type %in% c("SEIQHR", "SEIQHRF")) {  
+  if (type %in% c("SEIQHR", "SEIQHRF", "SEIQHRFPA")) {  
+    
+    inf.prob.ep <- dat$param$inf.prob.ep
+    act.rate.ep <- dat$param$act.rate.ep
+    inf.prob.ip <- dat$param$inf.prob.ip
+    act.rate.ip <- dat$param$act.rate.ip
+    inf.prob.qp <- dat$param$inf.prob.qp
+    act.rate.qp <- dat$param$act.rate.qp
+    inf.prob.ap <- dat$param$inf.prob.ap
+    act.rate.ap <- dat$param$act.rate.ap
+    
     act.rate.e <- dat$param$act.rate.e
     if (!(length(act.rate.e) == 1 || length(act.rate.e == nsteps))) {
       stop("Length of act.rate.e must be 1 or the value of nsteps")
@@ -67,6 +77,10 @@ infection.seiqhrf.icm <- function(dat, at) {
     if (!(length(act.rate.q) == 1 || length(act.rate.q == nsteps))) {
       stop("Length of act.rate.q must be 1 or the value of nsteps")
     }
+    act.rate.a <- dat$param$act.rate.a
+    if (!(length(act.rate.a) == 1 || length(act.rate.a == nsteps))) {
+      stop("Length of act.rate.a must be 1 or the value of nsteps")
+    }
     act.rate.q.g2 <- dat$param$act.rate.q.g2
     if (!is.null(act.rate.q.g2) &&
         !(length(act.rate.q.g2) == 1 || length(act.rate.q.g2 == nsteps))) {
@@ -75,6 +89,10 @@ infection.seiqhrf.icm <- function(dat, at) {
     inf.prob.q <- dat$param$inf.prob.q
     if (!(length(inf.prob.q) == 1 || length(inf.prob.q == nsteps))) {
       stop("Length of inf.prob.q must be 1 or the value of nsteps")
+    }
+    inf.prob.a <- dat$param$inf.prob.a
+    if (!(length(inf.prob.a) == 1 || length(inf.prob.a == nsteps))) {
+      stop("Length of inf.prob.a must be 1 or the value of nsteps")
     }
     inf.prob.q.g2 <- dat$param$inf.prob.q.g2
     if (!is.null(inf.prob.q.g2) &&
@@ -402,6 +420,348 @@ infection.seiqhrf.icm <- function(dat, at) {
     }
   }
 
+  #NEW STUFF
+  
+  if (dat$param$groups == 1) {
+    if (length(act.rate.a) > 1) {
+      acts <- round(act.rate.a[at - 1] * dat$epi$num[at - 1] / 2)
+    } else {
+      acts <- round(act.rate.a * dat$epi$num[at - 1] / 2)
+    }
+  }
+  
+  ## Edgelist
+  if (dat$param$groups == 1) {
+    p1 <- ssample(which(dat$attr$active == 1 & dat$attr$status != "f"), acts, replace = TRUE)
+    p2 <- ssample(which(dat$attr$active == 1 & dat$attr$status != "f"), acts, replace = TRUE)
+  } 
+  
+  del <- NULL
+  if (length(p1) > 0 & length(p2) > 0) {
+    del <- data.frame(p1, p2)
+    if (dat$param$groups == 1) {
+      while (any(del$p1 == del$p2)) {
+        del$p2 <- ifelse(del$p1 == del$p2,
+                         ssample(which(dat$attr$active == 1 & dat$attr$status != "f"), 1), del$p2)
+      }
+    }
+    
+    ## Discordant edgelist (del)
+    del$p1.stat <- dat$attr$status[del$p1]
+    del$p2.stat <- dat$attr$status[del$p2]
+    # serodiscordance
+    serodis <- (del$p1.stat == "s" & del$p2.stat == "a") |
+      (del$p1.stat == "a" & del$p2.stat == "s")
+    del <- del[serodis == TRUE, ]
+    
+    ## Transmission on edgelist
+    if (nrow(del) > 0) {
+      if (dat$param$groups == 1) {
+        if (length(inf.prob.a) > 1) {
+          del$tprob <- inf.prob.a[at]
+        } else {
+          del$tprob <- inf.prob.a
+        }
+      }
+      #if (!is.null(dat$param$inter.eff.q) && at >= dat$param$inter.start.q &&
+      #    at <= dat$param$inter.stop.q) {
+      #  del$tprob <- del$tprob * (1 - dat$param$inter.eff.q)
+      #}
+      del$trans <- rbinom(nrow(del), 1, del$tprob)
+      del <- del[del$trans == TRUE, ]
+      if (nrow(del) > 0) {
+        if (dat$param$groups == 1) {
+          newIds <- unique(ifelse(del$p1.stat == "s", del$p1, del$p2))
+          #nExp.q <- length(newIds)
+        }
+       
+        dat$attr$status[newIds] <- "e"
+        dat$attr$expTime[newIds] <- at
+      } else {
+        #nExp.q <- nExpg2.q <- 0
+      }
+    } else {
+    #  nExp.q <- nExpg2.q <- 0
+    }
+  } else {
+  #  nExp.q <- nExpg2.q <- 0
+  }
+
+  #Start of A->P
+  
+  if (dat$param$groups == 1) {
+    if (length(act.rate.ap) > 1) {
+      acts <- round(act.rate.ap[at - 1] * dat$epi$num[at - 1] / 2)
+    } else {
+      acts <- round(act.rate.ap * dat$epi$num[at - 1] / 2)
+    }
+  }
+  
+  ## Edgelist
+  if (dat$param$groups == 1) {
+    p1 <- ssample(which(dat$attr$active == 1 & dat$attr$status != "f"), acts, replace = TRUE)
+    p2 <- ssample(which(dat$attr$active == 1 & dat$attr$status != "f"), acts, replace = TRUE)
+  } 
+  
+  del <- NULL
+  if (length(p1) > 0 & length(p2) > 0) {
+    del <- data.frame(p1, p2)
+    if (dat$param$groups == 1) {
+      while (any(del$p1 == del$p2)) {
+        del$p2 <- ifelse(del$p1 == del$p2,
+                         ssample(which(dat$attr$active == 1 & dat$attr$status != "f"), 1), del$p2)
+      }
+    }
+    
+    ## Discordant edgelist (del)
+    del$p1.stat <- dat$attr$status[del$p1]
+    del$p2.stat <- dat$attr$status[del$p2]
+    # serodiscordance
+    serodis <- (del$p1.stat == "p" & del$p2.stat == "a") |
+      (del$p1.stat == "a" & del$p2.stat == "p")
+    del <- del[serodis == TRUE, ]
+    
+    ## Transmission on edgelist
+    if (nrow(del) > 0) {
+      if (dat$param$groups == 1) {
+        if (length(inf.prob.ap) > 1) {
+          del$tprob <- inf.prob.ap[at]
+        } else {
+          del$tprob <- inf.prob.ap
+        }
+      }
+      #if (!is.null(dat$param$inter.eff.q) && at >= dat$param$inter.start.q &&
+      #    at <= dat$param$inter.stop.q) {
+      #  del$tprob <- del$tprob * (1 - dat$param$inter.eff.q)
+      #}
+      del$trans <- rbinom(nrow(del), 1, del$tprob)
+      del <- del[del$trans == TRUE, ]
+      if (nrow(del) > 0) {
+        if (dat$param$groups == 1) {
+          newIds <- unique(ifelse(del$p1.stat == "p", del$p1, del$p2))
+          #nExp.q <- length(newIds)
+        }
+        
+        dat$attr$status[newIds] <- "a"
+        dat$attr$expTime[newIds] <- at
+      } else {
+        #nExp.q <- nExpg2.q <- 0
+      }
+    } else {
+      #  nExp.q <- nExpg2.q <- 0
+    }
+  } else {
+    #  nExp.q <- nExpg2.q <- 0
+  }
+  
+  
+  #Start of E->P
+  
+  if (dat$param$groups == 1) {
+    if (length(act.rate.ep) > 1) {
+      acts <- round(act.rate.ep[at - 1] * dat$epi$num[at - 1] / 2)
+    } else {
+      acts <- round(act.rate.ep * dat$epi$num[at - 1] / 2)
+    }
+  }
+  
+  ## Edgelist
+  if (dat$param$groups == 1) {
+    p1 <- ssample(which(dat$attr$active == 1 & dat$attr$status != "f"), acts, replace = TRUE)
+    p2 <- ssample(which(dat$attr$active == 1 & dat$attr$status != "f"), acts, replace = TRUE)
+  } 
+  
+  del <- NULL
+  if (length(p1) > 0 & length(p2) > 0) {
+    del <- data.frame(p1, p2)
+    if (dat$param$groups == 1) {
+      while (any(del$p1 == del$p2)) {
+        del$p2 <- ifelse(del$p1 == del$p2,
+                         ssample(which(dat$attr$active == 1 & dat$attr$status != "f"), 1), del$p2)
+      }
+    }
+    
+    ## Discordant edgelist (del)
+    del$p1.stat <- dat$attr$status[del$p1]
+    del$p2.stat <- dat$attr$status[del$p2]
+    # serodiscordance
+    serodis <- (del$p1.stat == "p" & del$p2.stat == "e") |
+      (del$p1.stat == "e" & del$p2.stat == "p")
+    del <- del[serodis == TRUE, ]
+    
+    ## Transmission on edgelist
+    if (nrow(del) > 0) {
+      if (dat$param$groups == 1) {
+        if (length(inf.prob.ep) > 1) {
+          del$tprob <- inf.prob.ep[at]
+        } else {
+          del$tprob <- inf.prob.ep
+        }
+      }
+      #if (!is.null(dat$param$inter.eff.q) && at >= dat$param$inter.start.q &&
+      #    at <= dat$param$inter.stop.q) {
+      #  del$tprob <- del$tprob * (1 - dat$param$inter.eff.q)
+      #}
+      del$trans <- rbinom(nrow(del), 1, del$tprob)
+      del <- del[del$trans == TRUE, ]
+      if (nrow(del) > 0) {
+        if (dat$param$groups == 1) {
+          newIds <- unique(ifelse(del$p1.stat == "p", del$p1, del$p2))
+          #nExp.q <- length(newIds)
+        }
+        
+        dat$attr$status[newIds] <- "a"
+        dat$attr$expTime[newIds] <- at
+      } else {
+        #nExp.q <- nExpg2.q <- 0
+      }
+    } else {
+      #  nExp.q <- nExpg2.q <- 0
+    }
+  } else {
+    #  nExp.q <- nExpg2.q <- 0
+  }
+  
+  
+  #Start of I->P
+  
+  if (dat$param$groups == 1) {
+    if (length(act.rate.ip) > 1) {
+      acts <- round(act.rate.ip[at - 1] * dat$epi$num[at - 1] / 2)
+    } else {
+      acts <- round(act.rate.ip * dat$epi$num[at - 1] / 2)
+    }
+  }
+  
+  ## Edgelist
+  if (dat$param$groups == 1) {
+    p1 <- ssample(which(dat$attr$active == 1 & dat$attr$status != "f"), acts, replace = TRUE)
+    p2 <- ssample(which(dat$attr$active == 1 & dat$attr$status != "f"), acts, replace = TRUE)
+  } 
+  
+  del <- NULL
+  if (length(p1) > 0 & length(p2) > 0) {
+    del <- data.frame(p1, p2)
+    if (dat$param$groups == 1) {
+      while (any(del$p1 == del$p2)) {
+        del$p2 <- ifelse(del$p1 == del$p2,
+                         ssample(which(dat$attr$active == 1 & dat$attr$status != "f"), 1), del$p2)
+      }
+    }
+    
+    ## Discordant edgelist (del)
+    del$p1.stat <- dat$attr$status[del$p1]
+    del$p2.stat <- dat$attr$status[del$p2]
+    # serodiscordance
+    serodis <- (del$p1.stat == "p" & del$p2.stat == "i") |
+      (del$p1.stat == "i" & del$p2.stat == "p")
+    del <- del[serodis == TRUE, ]
+    
+    ## Transmission on edgelist
+    if (nrow(del) > 0) {
+      if (dat$param$groups == 1) {
+        if (length(inf.prob.ip) > 1) {
+          del$tprob <- inf.prob.ip[at]
+        } else {
+          del$tprob <- inf.prob.ip
+        }
+      }
+      #if (!is.null(dat$param$inter.eff.q) && at >= dat$param$inter.start.q &&
+      #    at <= dat$param$inter.stop.q) {
+      #  del$tprob <- del$tprob * (1 - dat$param$inter.eff.q)
+      #}
+      del$trans <- rbinom(nrow(del), 1, del$tprob)
+      del <- del[del$trans == TRUE, ]
+      if (nrow(del) > 0) {
+        if (dat$param$groups == 1) {
+          newIds <- unique(ifelse(del$p1.stat == "p", del$p1, del$p2))
+          #nExp.q <- length(newIds)
+        }
+        
+        dat$attr$status[newIds] <- "a"
+        dat$attr$expTime[newIds] <- at
+      } else {
+        #nExp.q <- nExpg2.q <- 0
+      }
+    } else {
+      #  nExp.q <- nExpg2.q <- 0
+    }
+  } else {
+    #  nExp.q <- nExpg2.q <- 0
+  }
+  
+  
+  #Start of Q->P
+  
+  if (dat$param$groups == 1) {
+    if (length(act.rate.qp) > 1) {
+      acts <- round(act.rate.qp[at - 1] * dat$epi$num[at - 1] / 2)
+    } else {
+      acts <- round(act.rate.qp * dat$epi$num[at - 1] / 2)
+    }
+  }
+  
+  ## Edgelist
+  if (dat$param$groups == 1) {
+    p1 <- ssample(which(dat$attr$active == 1 & dat$attr$status != "f"), acts, replace = TRUE)
+    p2 <- ssample(which(dat$attr$active == 1 & dat$attr$status != "f"), acts, replace = TRUE)
+  } 
+  
+  del <- NULL
+  if (length(p1) > 0 & length(p2) > 0) {
+    del <- data.frame(p1, p2)
+    if (dat$param$groups == 1) {
+      while (any(del$p1 == del$p2)) {
+        del$p2 <- ifelse(del$p1 == del$p2,
+                         ssample(which(dat$attr$active == 1 & dat$attr$status != "f"), 1), del$p2)
+      }
+    }
+    
+    ## Discordant edgelist (del)
+    del$p1.stat <- dat$attr$status[del$p1]
+    del$p2.stat <- dat$attr$status[del$p2]
+    # serodiscordance
+    serodis <- (del$p1.stat == "p" & del$p2.stat == "q") |
+      (del$p1.stat == "q" & del$p2.stat == "p")
+    del <- del[serodis == TRUE, ]
+    
+    ## Transmission on edgelist
+    if (nrow(del) > 0) {
+      if (dat$param$groups == 1) {
+        if (length(inf.prob.qp) > 1) {
+          del$tprob <- inf.prob.qp[at]
+        } else {
+          del$tprob <- inf.prob.qp
+        }
+      }
+      #if (!is.null(dat$param$inter.eff.q) && at >= dat$param$inter.start.q &&
+      #    at <= dat$param$inter.stop.q) {
+      #  del$tprob <- del$tprob * (1 - dat$param$inter.eff.q)
+      #}
+      del$trans <- rbinom(nrow(del), 1, del$tprob)
+      del <- del[del$trans == TRUE, ]
+      if (nrow(del) > 0) {
+        if (dat$param$groups == 1) {
+          newIds <- unique(ifelse(del$p1.stat == "p", del$p1, del$p2))
+          #nExp.q <- length(newIds)
+        }
+        
+        dat$attr$status[newIds] <- "a"
+        dat$attr$expTime[newIds] <- at
+      } else {
+        #nExp.q <- nExpg2.q <- 0
+      }
+    } else {
+      #  nExp.q <- nExpg2.q <- 0
+    }
+  } else {
+    #  nExp.q <- nExpg2.q <- 0
+  }
+  
+  #END OF NEW STUFF
+  
+  
+  
   ## Output
   if (type %in% c("SEIQHR", "SEIQHRF")) {  
     if (at == 2) {
@@ -816,7 +1176,7 @@ progress.seiqhrf.icm <- function(dat, at) {
     idsTraceE <-  ssample(idsExposed, nTraceE)
     
     status[idsTraceS] <- 'p'
-    status[idsTraceE] <- 'e'
+    status[idsTraceE] <- 'a'
   }
   
   dat$attr$status <- status
@@ -855,7 +1215,7 @@ progress.seiqhrf.icm <- function(dat, at) {
   idsProgA <- numeric(0)
   
   if (nElig > 0) {
-    print(nElig)
+    #print(nElig)
     vecTimeSinceExp <- at - dat$attr$expTime[idsElig]
     vecTimeSinceExp[is.na(vecTimeSinceExp)] <- 0
     gammaRatesElig <- pweibull(vecTimeSinceExp, prog.a.dist.shape, scale=prog.a.dist.scale) 
@@ -869,6 +1229,35 @@ progress.seiqhrf.icm <- function(dat, at) {
   
   dat$attr$status <- status
   dat$attr$infTime[idsProgA] <- at
+  
+  
+  #Recovery of A (A->R)
+  
+  rec.a.dist.scale <- dat$param$rec.a.dist.scale
+  rec.a.dist.shape <- dat$param$rec.a.dist.shape
+  
+  nRecA <- 0
+  idsElig <- which(active == 1 & (status == "a"))
+  nElig <- length(idsElig)
+  idsRecA <- numeric(0)
+  
+  if (nElig > 0) {
+    #print(nElig)
+    vecTimeSinceExp <- at - dat$attr$expTime[idsElig]
+    vecTimeSinceExp[is.na(vecTimeSinceExp)] <- 0
+    gammaRatesElig <- pweibull(vecTimeSinceExp, rec.a.dist.shape, scale=rec.a.dist.scale) 
+    nRecA <- round(sum(gammaRatesElig, na.rm=TRUE))
+    if (nRecA > 0) {
+      idsRecA <- ssample(idsElig, 
+                          nRecA, prob = gammaRatesElig)
+      status[idsRecA] <- "r"
+    }
+  }
+  
+  dat$attr$status <- status
+  dat$attr$infTime[idsRecA] <- at
+  
+  
   
   #END OF NEW STUFF
   
