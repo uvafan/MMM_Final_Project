@@ -204,7 +204,7 @@ infection.seiqhrf.icm <- function(dat, at) {
     nExp.i <- nExpg2.i <- 0
   }
 
-  if (type %in% c("SEIQHRF")) {  
+  if (type %in% c("SEIQHRF", "SEIQHRFPA")) {  
     
   # Transmission from exposed  
     ## Expected acts
@@ -763,7 +763,7 @@ infection.seiqhrf.icm <- function(dat, at) {
   
   
   ## Output
-  if (type %in% c("SEIQHR", "SEIQHRF")) {  
+  if (type %in% c("SEIQHR", "SEIQHRF", "SEIQHRFPA")) {  
     if (at == 2) {
       dat$epi$se.flow <- c(0, nExp.i + nExp.q)
     } else {
@@ -1160,9 +1160,15 @@ progress.seiqhrf.icm <- function(dat, at) {
   idsExposed <- which(active ==1 & status == 'e')
   nExposed <- length(idsExposed)
   totalSE <- nSuscep + nExposed
-  nTrace <- min(totalSE, nProg * con.agg)
+  if(length(con.agg) > 1) {
+    nTrace <- min(totalSE, round(nProg * con.agg[at-1]))
+  }
+  else {
+    nTrace <- min(totalSE, round(nProg * con.agg))
+  }
+  
   idsTraceS <- numeric(0)
-    
+
   if(nTrace > 0) {
     accuracy <- con.acc + ((1- con.acc) * nExposed/totalSE)
     
