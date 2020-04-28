@@ -11,7 +11,7 @@ export const styles = makeStyles({
     textAlign: 'center',
   },
   sliderClasses: {
-    width: '90%',
+    width: '90% !important',
   },
 });
   
