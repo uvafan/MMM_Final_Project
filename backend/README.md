@@ -12,3 +12,8 @@ Rscript install.R
 pip3 install -r requirements.txt
 python3 server.py
 ```
+
+## Connect to AWS instance:
+```
+ssh -i "MMM-backend.pem" ubuntu@ec2-184-73-33-179.compute-1.amazonaws.com
+```
