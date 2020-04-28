@@ -10,7 +10,6 @@ CORS(app)
 @app.route('/dataset', methods=['POST'])
 def compute_dataset():
     # Extract fields
-    # TODO: Set defaults
     isolation = int(request.json.get('isolation', 0))
     isolationEnd = int(request.json.get('isolationEnd', 0))
     isolationCompliance = int(request.json.get('isolationCompliance', 0))

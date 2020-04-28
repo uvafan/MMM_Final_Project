@@ -8,9 +8,11 @@ gpg --keyserver keyserver.ubuntu.com --recv-key E298A3A825C0D65DFD57CBB651716619
 gpg -a --export E084DAB9 | sudo apt-key add -
 sudo apt-get update
 sudo apt-get upgrade
-sudo apt-get install r-base r-base-dev
+sudo apt-get install r-base r-base-dev libcurl4-openssl-dev libssl-dev libxml2-dev python3-venv
 sudo Rscript install.R 
-sudo apt install python3-pip gunicorn3
+sudo apt install python3-pip gunicorn3 supervisor 
+python3 -m venv .env
+source .env/bin/activate
 pip3 install -r requirements.txt
 ```
 
