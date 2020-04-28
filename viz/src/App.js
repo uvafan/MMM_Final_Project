@@ -57,6 +57,7 @@ function App() {
     },
     tooltips: {
       mode: 'index',
+      position: 'nearest',
       intersect: false,
     },
     scales: {
@@ -81,7 +82,6 @@ function App() {
     labels,
     datasets,
   };
-  console.log(data)
   return (
     <div className="App">
       <header className="App-header">
