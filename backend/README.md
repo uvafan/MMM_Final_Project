@@ -21,7 +21,7 @@ python3 server.py
 
 ## Prod
 ```
-gunicorn3 -w 4 -b 127.0.0.1:80 server:app
+sudo gunicorn3 -w 4 -b 0.0.0.0:80 server:app
 ```
 
 ## Connect to AWS instance:

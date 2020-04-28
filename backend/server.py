@@ -11,19 +11,19 @@ CORS(app)
 def compute_dataset():
     # Extract fields
     # TODO: Set defaults
-    isolation = request.json.get('isolation', 0)
-    isolationEnd = str(request.json.get('isolationEnd', 0))
-    isolationCompliance = str(request.json.get('isolationCompliance', 0))
-    physDist = str(request.json.get('physDist', 0))
-    physDistStart = str(request.json.get('physDistStart', 0))
-    physDistAfterActRate = str(request.json.get('physDistAfterActRate', 0))
-    lockdown = str(request.json.get('lockdown', 0))
-    lockdownStart = str(request.json.get('lockdownStart', 0))
-    lockdownAfterActRate = str(request.json.get('lockdownAfterActRate', 0))
-    lockdownLength = str(request.json.get('lockdownLength', 0))
-    contactTracing = str(request.json.get('contactTracing', 0))
-    contactTracingStart = str(request.json.get('contactTracingStart', 0))
-    contactTracingAggressiveness = str(request.json.get('contactTracingAggressiveness', 0))
+    isolation = int(request.json.get('isolation', 0))
+    isolationEnd = int(request.json.get('isolationEnd', 0))
+    isolationCompliance = int(request.json.get('isolationCompliance', 0))
+    physDist = int(request.json.get('physDist', 0))
+    physDistStart = int(request.json.get('physDistStart', 0))
+    physDistAfterActRate = int(request.json.get('physDistAfterActRate', 0))
+    lockdown = int(request.json.get('lockdown', 0))
+    lockdownStart = int(request.json.get('lockdownStart', 0))
+    lockdownAfterActRate = int(request.json.get('lockdownAfterActRate', 0))
+    lockdownLength = int(request.json.get('lockdownLength', 0))
+    contactTracing = int(request.json.get('contactTracing', 0))
+    contactTracingStart = int(request.json.get('contactTracingStart', 0))
+    contactTracingAggressiveness = int(request.json.get('contactTracingAggressiveness', 0))
 
     # Run Script
     command = f'Rscript simulate.R {isolation} {isolationEnd} {isolationCompliance} {physDist} {physDistStart} {physDistAfterActRate} {lockdown} {lockdownStart} {lockdownAfterActRate} {lockdownLength} {contactTracing} {contactTracingStart} {contactTracingAggressiveness}'
