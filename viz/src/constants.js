@@ -12,4 +12,4 @@ export const STATE_MAPPING = {
   
 export const STATES = Object.keys(STATE_MAPPING);
 
-export const API_URL = "localhost:5000/dataset";
+export const API_URL = "http://localhost:5000/dataset";
