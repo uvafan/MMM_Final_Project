@@ -49,7 +49,7 @@ baseline_act_rate <- 12
 simulate <- function(# control.icm params
                      type = "SEIQHRFPA", 
                      nsteps = 366, 
-                     nsims = 5,
+                     nsims = 1,
                      ncores = 1,
                      prog.rand = FALSE,
                      rec.rand = FALSE,
@@ -198,10 +198,89 @@ simulate <- function(# control.icm params
 
 
 ## ---- echo=TRUE, eval=TRUE-------------------------------------------------------------
-baseline_sim <- simulate()
+ramp <- function(t, start, end, start_val, end_val, after_val) {
+   ifelse(t <= start, start_val, ifelse(t<=end, start_val + (t-(start+1)) * (end_val-start_val)/(end-start), after_val))
+}
+
+lockdown <- function(t, start, end, start_val, lockdown_val, after_rate) {
+  ifelse(t<=end, ifelse(t <= start, start_val, lockdown_val), after_rate)
+}
+# # various contact tracing levels (+isolation)
+
+# starts <- c(7, 17, 37)
+# aggressiveness_vals <- c(3,5,10,20)
+
+# for (start in starts){
+#   for (aggressiveness in aggressiveness_vals){
+#     write_csv(simulate(quar.rate=ramp(1:366, 2, 32, .0333, .3333, .3333), con.agg=ramp(1:366, start, start+20, 0, aggressiveness, aggressiveness))$df, paste('results/trace_',start,'_',aggressiveness,'.csv',sep=''))
+#   }
+# }
+
+# # various physical distancing strategies (+isolation)
+
+# starts <- c(7, 17, 37)
+# after_act_rates <- c(4, 8)
+
+# for (start in starts){
+#   for (after_act_rate in after_act_rates){
+#     write_csv(simulate(quar.rate=ramp(1:366, 2, 32, .0333, .3333, .3333), baseline_act_rate=ramp(1:366, start, start+20, 12, after_act_rate, after_act_rate))$df, paste('results/distance_',start,'_',after_act_rate,'.csv',sep=''))
+#   }
+# }
+
+# # Various lockdowns
+
+# starts <- c(7, 17, 37)
+# lengths <- c(15, 30, 60)
+# after_act_rates <- c(4, 8)
+
+# for (start in starts){
+#   for (length in lengths){
+#     for (after_act_rate in after_act_rates){
+#       write_csv(simulate(quar.rate=ramp(1:366, 2, 32, .0333, .3333, .3333), baseline_act_rate=lockdown(1:366, start, start+length, 12, 2, after_act_rate))$df, paste('results/lockdown_',start,'_',length,'_',after_act_rate,'.csv',sep=''))
+#     }
+#   }
+# }
+args = commandArgs(trailingOnly=TRUE)
+# ISOLATION
+do_isolation <- args[1]
+if(do_isolation == 1) {
+  isolation_end <- as.numeric(args[2])
+  isolation_compliance <- as.numeric(args[3])
+  quar_rate <- ramp(1:366, 2, isolation_end, .0333, isolation_compliance, isolation_compliance)
+} else {
+  quar_rate <- 1/30
+}
+# PHYS DIST
+base_act_rate = 12
+do_phys_dist <- args[4]
+if(do_phys_dist == 1) {
+  start_distancing <- as.numeric(args[5])
+  after_act_rate <- as.numeric(args[6])
+  base_act_rate <- ramp(1:366, start_distancing, start_distancing+20, 12, after_act_rate, after_act_rate)
+} 
+# LOCKDOWNS
+do_lockdown <- args[7]
+if(do_lockdown == 1) {
+  start_distancing <- as.numeric(args[8])
+  after_act_rate <- as.numeric(args[9])
+  length <- as.numeric(args[10])
+  base_act_rate <- lockdown(1:366, start_distancing, start_distancing+length, 12, 2, after_act_rate)
+} 
+# CONTACT TRACING
+con_agg <- 0
+do_contact_tracing <- args[11]
+if(do_contact_tracing == 1) {
+  start_tracing <- as.numeric(args[12])
+  aggressiveness <- as.numeric(args[13])
+  con_agg <- ramp(1:366, start_tracing, start_tracing+20, 0, aggressiveness, aggressiveness)
+} 
+
+sim_results <- simulate(quar.rate=quar_rate, baseline_act_rate=base_act_rate, con.agg=con_agg)
 
 ## --------------------------------------------------------------------------------------
-cat(format_csv(baseline_sim$df))
+
+print(sim_results$df[366, 'f.num'])
+# cat(format_csv(sim_results$df))
 
 
 # ## ---- echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE------------------------------
