@@ -10,9 +10,12 @@ const Introduction = () => {
     <Container maxWidth="md">
       <Typography variant="h2" className={classes.titleClasses}>
         COVIM because we KARE
-
-COVID-19 Visualization and Intervention Modeling
-By Kiara, Aaron, Rashid, Eli
+      </Typography>
+      <Typography variant="h4" className={classes.titleClasses}>
+        COVID-19 Visualization and Intervention Modeling
+      </Typography>
+      <Typography variant="h6" className={classes.titleClasses}>
+        By Kiara, Aaron, Rashid, Eli
       </Typography>
       <Box pt={2} />
       <Typography variant="body1">
