@@ -1,27 +1,13 @@
 import React, {useState, useEffect} from 'react';
 import { API_URL } from './constants';
 import LineChart from './LineChart';
-import { makeStyles } from '@material-ui/core/styles';
+import { styles } from './styles';
+import Container from '@material-ui/core/Container';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Tooltip from '@material-ui/core/Tooltip';
 import Slider from '@material-ui/core/Slider';
-
-const styles = makeStyles({
-  titleClasses: {
-    textAlign: 'center',
-  },
-  sliderContainerClasses: {
-    width: '50%',
-    display: 'inline-block',
-    verticalAlign: 'top',
-    textAlign: 'center',
-  },
-  sliderClasses: {
-    width: '90%',
-  },
-});
 
 const InteractiveSimulator = () => {
   // TODO: Add Tooltip text
@@ -85,7 +71,7 @@ const InteractiveSimulator = () => {
   );
   
   return (
-    <>
+    <Container maxWidth="md">
       <Typography variant="h2" className={classes.titleClasses}>
         Interactive Simulator
       </Typography>
@@ -167,7 +153,7 @@ const InteractiveSimulator = () => {
       </div>
       </Box>
       {loading ? <LinearProgress /> : <LineChart jsonData={jsonData}/>}
-    </>
+    </Container>
   );
 }
 

@@ -1,6 +1,5 @@
 import React from 'react';
 import './App.css';
-import Container from '@material-ui/core/Container';
 import AppBar from '@material-ui/core/AppBar';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Divider from '@material-ui/core/Divider';
@@ -26,7 +25,11 @@ import {
   Route,
   Link
 } from "react-router-dom";
+import Introduction from './Introduction';
+import Background from './Background';
 import InteractiveSimulator from './InteractiveSimulator';
+import Results from './Results';
+import Credits from './Credits';
 
 const drawerWidth = 240;
 
@@ -168,10 +171,20 @@ const App = () => {
         <main className={classes.content}>
           <div className={classes.toolbar} />
           <Switch>
+              <Route exact path={pages[0].path}>
+                <Introduction />
+              </Route>
+              <Route path={pages[1].path}>
+                <Background />
+              </Route>
               <Route path={pages[2].path}>
-                <Container maxWidth="md">
-                  <InteractiveSimulator />
-                </Container>
+                <InteractiveSimulator />
+              </Route>
+              <Route path={pages[3].path}>
+                <Results />
+              </Route>
+              <Route path={pages[4].path}>
+                <Credits />
               </Route>
           </Switch>
         </main>
