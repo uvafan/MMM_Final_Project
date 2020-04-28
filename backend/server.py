@@ -11,16 +11,18 @@ CORS(app)
 def compute_dataset():
     # Extract fields
     # TODO: Set defaults
-    isolation_multiplier = request.form.get('isolationMultiplier', 1)
-    contact_tracing_multiplier = request.form.get('contactTracingMultiplier', 1)
-    physical_distancing_multiplier = request.form.get('physicalDistancingMultiplier', 1)
+    isolation = request.form.get('isolationMultiplier', 1)
+    contact_tracing = request.form.get('contactTracingMultiplier', 1)
+    physical_distancing = request.form.get('physicalDistancingMultiplier', 1)
     hospital_capacity = request.form.get('hospitalCapacity', 1)
     lockdown_days = request.form.get('lockdownDays', 1)
     lockdown_start = request.form.get('lockdownStart', 1)
-    mask_multiplier = request.form.get('maskMultiplier', 1)
+    mask = request.form.get('maskMultiplier', 1)
 
     # Example script run
     result = subprocess.run(['cmd', '/c', 'type', 'sample.csv'], stdout=subprocess.PIPE).stdout.decode('utf-8') # type = cat but for windows
+    # result = subprocess.run(['cmd', '/c', 'Rscript', 'simulate.R', 
+    #                       isolation, contact_tracing, physical_distancing, hospital_capacity, lockdown_days, lockdown_start, mask], stdout=subprocess.PIPE).stdout.decode('utf-8') 
     
     # Convert to JSON
     dct = {}
