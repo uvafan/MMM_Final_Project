@@ -20,7 +20,8 @@ def compute_dataset():
     mask = request.form.get('maskMultiplier', 1)
 
     # Example script run
-    result = subprocess.run(['cmd', '/c', 'type', 'sample.csv'], stdout=subprocess.PIPE).stdout.decode('utf-8') # type = cat but for windows
+    result = subprocess.run(['cat', 'sample.csv'], stdout=subprocess.PIPE).stdout.decode('utf-8') # type = cat but for windows
+    # result = subprocess.run(['cmd', '/c', 'type', 'sample.csv'], stdout=subprocess.PIPE).stdout.decode('utf-8') # type = cat but for windows
     # result = subprocess.run(['cmd', '/c', 'Rscript', 'simulate.R', 
     #                       isolation, contact_tracing, physical_distancing, hospital_capacity, lockdown_days, lockdown_start, mask], stdout=subprocess.PIPE).stdout.decode('utf-8') 
     
