@@ -1,7 +1,7 @@
 ## ----installation, include=FALSE, eval=TRUE--------------------------------------------
 for (pkg in c("tidyverse", "magrittr", "lubridate", "knitr", 
               "gt", "devtools", "DiagrammeR", "EpiModel", 
-              "parallel", "foreach", "tictoc", "patchwork")) 
+              "parallel", "foreach", "tictoc", "patchwork", "future")) 
   if (!requireNamespace(pkg)) install.packages(pkg)
 
 if (!requireNamespace("gt")) install_github("gt")
@@ -218,208 +218,208 @@ print(baseline_sim$df[366,"f.num"])
 write_csv(baseline_sim$df, 'results/baseline.csv')
 
 
-## ---- echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE------------------------------
-baseline_plot_df <- baseline_sim$df %>%
-  # use only the prevalence columns
-  select(time, s.num, e.num, i.num, q.num, 
-         h.num, r.num, f.num, p.num, a.num) %>%
-  pivot_longer(-c(time),
-               names_to="compartment",
-               values_to="count") %>%
-  filter(time <= 250)
+# ## ---- echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE------------------------------
+# baseline_plot_df <- baseline_sim$df %>%
+#   # use only the prevalence columns
+#   select(time, s.num, e.num, i.num, q.num, 
+#          h.num, r.num, f.num, p.num, a.num) %>%
+#   pivot_longer(-c(time),
+#                names_to="compartment",
+#                values_to="count") %>%
+#   filter(time <= 250)
 
 
-# define a standard set of colours to represent compartments
-compcols <- c("s.num" = "yellow", "e.num" = "orange", "i.num" = "red",
-              "q.num" = "cyan", "h.num" = "magenta", "r.num" = "lightgreen",
-              "f.num" = "black", "p.num" = "blue", "a.num" = "green")
-complabels <- c("s.num" = "Susceptible", "e.num" = "Infected/asymptomatic", 
-                "i.num" = "Infected/infectious", "q.num" = "Isolated",
-                "h.num" = "Requires hospitalisation", "r.num" = "Recovered",
-                "f.num" = "Deaths due to COVID-19", "p.num" = "Isolated, not infected", "a.num" = "Isolated, infected, asymptomatic")
+# # define a standard set of colours to represent compartments
+# compcols <- c("s.num" = "yellow", "e.num" = "orange", "i.num" = "red",
+#               "q.num" = "cyan", "h.num" = "magenta", "r.num" = "lightgreen",
+#               "f.num" = "black", "p.num" = "blue", "a.num" = "green")
+# complabels <- c("s.num" = "Susceptible", "e.num" = "Infected/asymptomatic", 
+#                 "i.num" = "Infected/infectious", "q.num" = "Isolated",
+#                 "h.num" = "Requires hospitalisation", "r.num" = "Recovered",
+#                 "f.num" = "Deaths due to COVID-19", "p.num" = "Isolated, not infected", "a.num" = "Isolated, infected, asymptomatic")
 
-baseline_plot_df %>%
-  # examine only the first 100 days since it
-  # is all over by then using the default parameters
-  filter(time <= 150) %>%
-  ggplot(aes(x=time, y=count, colour=compartment)) +
-    geom_line(size=2, alpha=0.5) +
-    scale_colour_manual(values = compcols, labels=complabels) +
-    theme_minimal() +
-    labs(title="Baseline simulation",
-         x="Days since beginning of epidemic",
-         y="Prevalence (persons)")
-
-
-## ---- echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE------------------------------
-baseline_plot_df %>%
-  filter(compartment %in% c("e.num","i.num",
-                            "q.num","h.num",
-                            "f.num", "p.num", "a.num")) %>%
-filter(time <= 150) %>%
-  ggplot(aes(x=time, y=count, colour=compartment)) +
-    geom_line(size=2, alpha=0.5) +
-    scale_colour_manual(values = compcols, labels=complabels) +
-    theme_minimal() +
-    labs(title="Baseline simulation",
-         x="Days since beginning of epidemic",
-         y="Prevalence (persons)")
+# baseline_plot_df %>%
+#   # examine only the first 100 days since it
+#   # is all over by then using the default parameters
+#   filter(time <= 150) %>%
+#   ggplot(aes(x=time, y=count, colour=compartment)) +
+#     geom_line(size=2, alpha=0.5) +
+#     scale_colour_manual(values = compcols, labels=complabels) +
+#     theme_minimal() +
+#     labs(title="Baseline simulation",
+#          x="Days since beginning of epidemic",
+#          y="Prevalence (persons)")
 
 
-## --------------------------------------------------------------------------------------
-# Those who feel symptoms isolate at a higher rate as awareness spreads
-isolation_ramp <- function(t) {
-  ifelse(t <= 2, 0.0333, ifelse(t <= 17, 0.0333 + (t-3)*(0.3333 - 0.03333)/15, 0.3333))
-}
-
-isolation_awareness <- simulate(quar.rate=isolation_ramp(1:366))
-print(isolation_awareness$df[366,"f.num"])
-
-## --------------------------------------------------------------------------------------
-baseline_plot_df <- isolation_awareness$df %>%
-  # use only the prevalence columns
-  select(time, s.num, e.num, i.num, q.num, 
-         h.num, r.num, f.num, p.num, a.num) %>%
-  pivot_longer(-c(time),
-               names_to="compartment",
-               values_to="count") %>%
-  filter(time <= 250)
+# ## ---- echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE------------------------------
+# baseline_plot_df %>%
+#   filter(compartment %in% c("e.num","i.num",
+#                             "q.num","h.num",
+#                             "f.num", "p.num", "a.num")) %>%
+# filter(time <= 150) %>%
+#   ggplot(aes(x=time, y=count, colour=compartment)) +
+#     geom_line(size=2, alpha=0.5) +
+#     scale_colour_manual(values = compcols, labels=complabels) +
+#     theme_minimal() +
+#     labs(title="Baseline simulation",
+#          x="Days since beginning of epidemic",
+#          y="Prevalence (persons)")
 
 
-# define a standard set of colours to represent compartments
-compcols <- c("s.num" = "yellow", "e.num" = "orange", "i.num" = "red",
-              "q.num" = "cyan", "h.num" = "magenta", "r.num" = "lightgreen",
-              "f.num" = "black", "p.num" = "blue", "a.num" = "green")
-complabels <- c("s.num" = "Susceptible", "e.num" = "Infected/asymptomatic", 
-                "i.num" = "Infected/infectious", "q.num" = "Isolated",
-                "h.num" = "Requires hospitalisation", "r.num" = "Recovered",
-                "f.num" = "Deaths due to COVID-19", "p.num" = "Isolated, not infected", "a.num" = "Isolated, infected, asymptomatic")
+# ## --------------------------------------------------------------------------------------
+# # Those who feel symptoms isolate at a higher rate as awareness spreads
+# isolation_ramp <- function(t) {
+#   ifelse(t <= 2, 0.0333, ifelse(t <= 17, 0.0333 + (t-3)*(0.3333 - 0.03333)/15, 0.3333))
+# }
 
-baseline_plot_df %>%
-  # examine only the first 100 days since it
-  # is all over by then using the default parameters
-  filter(time <= 150) %>%
-  ggplot(aes(x=time, y=count, colour=compartment)) +
-    geom_line(size=2, alpha=0.5) +
-    scale_colour_manual(values = compcols, labels=complabels) +
-    theme_minimal() +
-    labs(title="Baseline simulation",
-         x="Days since beginning of epidemic",
-         y="Prevalence (persons)")
+# isolation_awareness <- simulate(quar.rate=isolation_ramp(1:366))
+# print(isolation_awareness$df[366,"f.num"])
+
+# ## --------------------------------------------------------------------------------------
+# baseline_plot_df <- isolation_awareness$df %>%
+#   # use only the prevalence columns
+#   select(time, s.num, e.num, i.num, q.num, 
+#          h.num, r.num, f.num, p.num, a.num) %>%
+#   pivot_longer(-c(time),
+#                names_to="compartment",
+#                values_to="count") %>%
+#   filter(time <= 250)
 
 
-## --------------------------------------------------------------------------------------
-baseline_plot_df %>%
-  filter(compartment %in% c("e.num","i.num",
-                            "q.num","h.num",
-                            "f.num", "p.num", "a.num")) %>%
-filter(time <= 150) %>%
-  ggplot(aes(x=time, y=count, colour=compartment)) +
-    geom_line(size=2, alpha=0.5) +
-    scale_colour_manual(values = compcols, labels=complabels) +
-    theme_minimal() +
-    labs(title="Baseline simulation",
-         x="Days since beginning of epidemic",
-         y="Prevalence (persons)")
+# # define a standard set of colours to represent compartments
+# compcols <- c("s.num" = "yellow", "e.num" = "orange", "i.num" = "red",
+#               "q.num" = "cyan", "h.num" = "magenta", "r.num" = "lightgreen",
+#               "f.num" = "black", "p.num" = "blue", "a.num" = "green")
+# complabels <- c("s.num" = "Susceptible", "e.num" = "Infected/asymptomatic", 
+#                 "i.num" = "Infected/infectious", "q.num" = "Isolated",
+#                 "h.num" = "Requires hospitalisation", "r.num" = "Recovered",
+#                 "f.num" = "Deaths due to COVID-19", "p.num" = "Isolated, not infected", "a.num" = "Isolated, infected, asymptomatic")
+
+# baseline_plot_df %>%
+#   # examine only the first 100 days since it
+#   # is all over by then using the default parameters
+#   filter(time <= 150) %>%
+#   ggplot(aes(x=time, y=count, colour=compartment)) +
+#     geom_line(size=2, alpha=0.5) +
+#     scale_colour_manual(values = compcols, labels=complabels) +
+#     theme_minimal() +
+#     labs(title="Baseline simulation",
+#          x="Days since beginning of epidemic",
+#          y="Prevalence (persons)")
 
 
-## --------------------------------------------------------------------------------------
-# ramp up contact tracing beginning on day 5
-agg_ramp <- function(t) {
-  ifelse(t <= 7, 0, ifelse(t <= 27, (t-8)*10/20, 10))
-}
-
-tracing <- simulate(quar.rate=isolation_ramp(1:366), con.agg=agg_ramp(1:366))
-print(tracing$df[366,"f.num"])
-
-
-## --------------------------------------------------------------------------------------
-# ramp up physical distancing beginning on day 5 for 50 days
-phys_dist_ramp <- function(t) {
-  ifelse(t<=57, ifelse(t <= 7, 12, ifelse(t <= 27, 12 - (t-8)*8/20, 4)), 12)
-}
-
-phys_dist <- simulate(quar.rate=isolation_ramp(1:366), baseline_act_rate=phys_dist_ramp(1:366))
-print(phys_dist$df[366,"f.num"])
-
-## --------------------------------------------------------------------------------------
-# ramp up physical distancing beginning on day 15 for 50 days
-phys_dist_ramp_15 <- function(t) {
-  ifelse(t<=67, ifelse(t <= 17, 12, ifelse(t <= 37, 12 - (t-18)*8/20, 4)), 12)
-}
-
-phys_dist_15 <- simulate(quar.rate=isolation_ramp(1:366), baseline_act_rate=phys_dist_ramp_15(1:366))
-print(phys_dist_15$df[366,"f.num"])
-
-## --------------------------------------------------------------------------------------
-# Lockdown lasting for 30 days starting at day 15
-lockdown30day <- function(t) {
-  ifelse(t<=47, ifelse(t <= 17, 12, 2), 12)
-}
-
-lock30day <- simulate(quar.rate=isolation_ramp(1:366), baseline_act_rate=lockdown30day(1:366))
-print(lock30day$df[366,"f.num"])
+# ## --------------------------------------------------------------------------------------
+# baseline_plot_df %>%
+#   filter(compartment %in% c("e.num","i.num",
+#                             "q.num","h.num",
+#                             "f.num", "p.num", "a.num")) %>%
+# filter(time <= 150) %>%
+#   ggplot(aes(x=time, y=count, colour=compartment)) +
+#     geom_line(size=2, alpha=0.5) +
+#     scale_colour_manual(values = compcols, labels=complabels) +
+#     theme_minimal() +
+#     labs(title="Baseline simulation",
+#          x="Days since beginning of epidemic",
+#          y="Prevalence (persons)")
 
 
-## --------------------------------------------------------------------------------------
-# Lockdown lasting for 30 days starting at day 15
-lockdown30daydist <- function(t) {
-  ifelse(t<=47, ifelse(t <= 17, 12, 2), 4)
-}
+# ## --------------------------------------------------------------------------------------
+# # ramp up contact tracing beginning on day 5
+# agg_ramp <- function(t) {
+#   ifelse(t <= 7, 0, ifelse(t <= 27, (t-8)*10/20, 10))
+# }
 
-lock30daydist <- simulate(quar.rate=isolation_ramp(1:366), baseline_act_rate=lockdown30daydist(1:366))
-print(lock30daydist$df[366,"f.num"])
-
-
-## --------------------------------------------------------------------------------------
-baseline_plot_df <- lock30daydist$df %>%
-  # use only the prevalence columns
-  select(time, s.num, e.num, i.num, q.num, 
-         h.num, r.num, f.num, p.num, a.num) %>%
-  pivot_longer(-c(time),
-               names_to="compartment",
-               values_to="count") %>%
-  filter(time <= 250)
+# tracing <- simulate(quar.rate=isolation_ramp(1:366), con.agg=agg_ramp(1:366))
+# print(tracing$df[366,"f.num"])
 
 
-# define a standard set of colours to represent compartments
-compcols <- c("s.num" = "yellow", "e.num" = "orange", "i.num" = "red",
-              "q.num" = "cyan", "h.num" = "magenta", "r.num" = "lightgreen",
-              "f.num" = "black", "p.num" = "blue", "a.num" = "green")
-complabels <- c("s.num" = "Susceptible", "e.num" = "Infected/asymptomatic", 
-                "i.num" = "Infected/infectious", "q.num" = "Isolated",
-                "h.num" = "Requires hospitalisation", "r.num" = "Recovered",
-                "f.num" = "Deaths due to COVID-19", "p.num" = "Isolated, not infected", "a.num" = "Isolated, infected, asymptomatic")
+# ## --------------------------------------------------------------------------------------
+# # ramp up physical distancing beginning on day 5 for 50 days
+# phys_dist_ramp <- function(t) {
+#   ifelse(t<=57, ifelse(t <= 7, 12, ifelse(t <= 27, 12 - (t-8)*8/20, 4)), 12)
+# }
 
-baseline_plot_df %>%
-  # examine only the first 100 days since it
-  # is all over by then using the default parameters
-  filter(time <= 150) %>%
-  ggplot(aes(x=time, y=count, colour=compartment)) +
-    geom_line(size=2, alpha=0.5) +
-    scale_colour_manual(values = compcols, labels=complabels) +
-    theme_minimal() +
-    labs(title="Baseline simulation",
-         x="Days since beginning of epidemic",
-         y="Prevalence (persons)")
+# phys_dist <- simulate(quar.rate=isolation_ramp(1:366), baseline_act_rate=phys_dist_ramp(1:366))
+# print(phys_dist$df[366,"f.num"])
 
-## --------------------------------------------------------------------------------------
-baseline_plot_df %>%
-  filter(compartment %in% c("e.num","i.num",
-                            "q.num","h.num",
-                            "f.num", "p.num", "a.num")) %>%
-filter(time >= 50 & time <= 100) %>%
-  ggplot(aes(x=time, y=count, colour=compartment)) +
-    geom_line(size=2, alpha=0.5) +
-    scale_colour_manual(values = compcols, labels=complabels) +
-    theme_minimal() +
-    labs(title="Baseline simulation",
-         x="Days since beginning of epidemic",
-         y="Prevalence (persons)")
+# ## --------------------------------------------------------------------------------------
+# # ramp up physical distancing beginning on day 15 for 50 days
+# phys_dist_ramp_15 <- function(t) {
+#   ifelse(t<=67, ifelse(t <= 17, 12, ifelse(t <= 37, 12 - (t-18)*8/20, 4)), 12)
+# }
+
+# phys_dist_15 <- simulate(quar.rate=isolation_ramp(1:366), baseline_act_rate=phys_dist_ramp_15(1:366))
+# print(phys_dist_15$df[366,"f.num"])
+
+# ## --------------------------------------------------------------------------------------
+# # Lockdown lasting for 30 days starting at day 15
+# lockdown30day <- function(t) {
+#   ifelse(t<=47, ifelse(t <= 17, 12, 2), 12)
+# }
+
+# lock30day <- simulate(quar.rate=isolation_ramp(1:366), baseline_act_rate=lockdown30day(1:366))
+# print(lock30day$df[366,"f.num"])
 
 
-## --------------------------------------------------------------------------------------
-write_csv(simulate()$df, 'results/baseline.csv')
+# ## --------------------------------------------------------------------------------------
+# # Lockdown lasting for 30 days starting at day 15
+# lockdown30daydist <- function(t) {
+#   ifelse(t<=47, ifelse(t <= 17, 12, 2), 4)
+# }
+
+# lock30daydist <- simulate(quar.rate=isolation_ramp(1:366), baseline_act_rate=lockdown30daydist(1:366))
+# print(lock30daydist$df[366,"f.num"])
+
+
+# ## --------------------------------------------------------------------------------------
+# baseline_plot_df <- lock30daydist$df %>%
+#   # use only the prevalence columns
+#   select(time, s.num, e.num, i.num, q.num, 
+#          h.num, r.num, f.num, p.num, a.num) %>%
+#   pivot_longer(-c(time),
+#                names_to="compartment",
+#                values_to="count") %>%
+#   filter(time <= 250)
+
+
+# # define a standard set of colours to represent compartments
+# compcols <- c("s.num" = "yellow", "e.num" = "orange", "i.num" = "red",
+#               "q.num" = "cyan", "h.num" = "magenta", "r.num" = "lightgreen",
+#               "f.num" = "black", "p.num" = "blue", "a.num" = "green")
+# complabels <- c("s.num" = "Susceptible", "e.num" = "Infected/asymptomatic", 
+#                 "i.num" = "Infected/infectious", "q.num" = "Isolated",
+#                 "h.num" = "Requires hospitalisation", "r.num" = "Recovered",
+#                 "f.num" = "Deaths due to COVID-19", "p.num" = "Isolated, not infected", "a.num" = "Isolated, infected, asymptomatic")
+
+# baseline_plot_df %>%
+#   # examine only the first 100 days since it
+#   # is all over by then using the default parameters
+#   filter(time <= 150) %>%
+#   ggplot(aes(x=time, y=count, colour=compartment)) +
+#     geom_line(size=2, alpha=0.5) +
+#     scale_colour_manual(values = compcols, labels=complabels) +
+#     theme_minimal() +
+#     labs(title="Baseline simulation",
+#          x="Days since beginning of epidemic",
+#          y="Prevalence (persons)")
+
+# ## --------------------------------------------------------------------------------------
+# baseline_plot_df %>%
+#   filter(compartment %in% c("e.num","i.num",
+#                             "q.num","h.num",
+#                             "f.num", "p.num", "a.num")) %>%
+# filter(time >= 50 & time <= 100) %>%
+#   ggplot(aes(x=time, y=count, colour=compartment)) +
+#     geom_line(size=2, alpha=0.5) +
+#     scale_colour_manual(values = compcols, labels=complabels) +
+#     theme_minimal() +
+#     labs(title="Baseline simulation",
+#          x="Days since beginning of epidemic",
+#          y="Prevalence (persons)")
+
+
+# ## --------------------------------------------------------------------------------------
+# write_csv(simulate()$df, 'results/baseline.csv')
 
 
 # ramp <- function(t, start, end, start_val, end_val, after_val) {
