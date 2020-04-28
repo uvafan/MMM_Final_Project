@@ -72,7 +72,7 @@ simulate <- function(# control.icm params
                      arrivals.FUN = arrivals.icm,
                      get_prev.FUN = get_prev.seiqhrf.icm,
                      # init.icm params
-                     s.num = 9996, # 999970
+                     s.num = 996, # 999970
                      e.num= 0,
                      i.num = 4, # 30
                      q.num = 0,
@@ -422,69 +422,69 @@ filter(time >= 50 & time <= 100) %>%
 write_csv(simulate()$df, 'results/baseline.csv')
 
 
-ramp <- function(t, start, end, start_val, end_val, after_val) {
-  ifelse(t <= start, start_val, ifelse(t<=end, start_val + (t-(start+1)) * (end_val-start_val)/(end-start), after_val))
-}
+# ramp <- function(t, start, end, start_val, end_val, after_val) {
+#   ifelse(t <= start, start_val, ifelse(t<=end, start_val + (t-(start+1)) * (end_val-start_val)/(end-start), after_val))
+# }
 
-# various isolation levels
-ends <- c(17, 32)
-compliance_levels <- c(0.3333, 0.6666)
-for (end in ends){
-  for (comp in compliance_levels){
-    write_csv(simulate(quar.rate=ramp(1:366, 2, end, .0333, comp, comp))$df, paste('results/isolation_',end,'_',comp,'.csv',sep=''))
-  }
-}
+# # various isolation levels
+# ends <- c(17, 32)
+# compliance_levels <- c(0.3333, 0.6666)
+# for (end in ends){
+#   for (comp in compliance_levels){
+#     write_csv(simulate(quar.rate=ramp(1:366, 2, end, .0333, comp, comp))$df, paste('results/isolation_',end,'_',comp,'.csv',sep=''))
+#   }
+# }
 
-lockdown <- function(t, start, end, start_val, lockdown_val, after_rate) {
-  ifelse(t<=end, ifelse(t <= start, start_val, lockdown_val), after_rate)
-}
-# various contact tracing levels (+isolation)
+# lockdown <- function(t, start, end, start_val, lockdown_val, after_rate) {
+#   ifelse(t<=end, ifelse(t <= start, start_val, lockdown_val), after_rate)
+# }
+# # various contact tracing levels (+isolation)
 
-starts <- c(7, 17, 37)
-aggressiveness_vals <- c(3,5,10,20)
+# starts <- c(7, 17, 37)
+# aggressiveness_vals <- c(3,5,10,20)
 
-for (start in starts){
-  for (aggressiveness in aggressiveness_vals){
-    write_csv(simulate(quar.rate=ramp(1:366, 2, 32, .0333, .3333, .3333), con.agg=ramp(1:366, start, start+20, 0, aggressiveness, aggressiveness))$df, paste('results/trace_',start,'_',aggressiveness,'.csv',sep=''))
-  }
-}
+# for (start in starts){
+#   for (aggressiveness in aggressiveness_vals){
+#     write_csv(simulate(quar.rate=ramp(1:366, 2, 32, .0333, .3333, .3333), con.agg=ramp(1:366, start, start+20, 0, aggressiveness, aggressiveness))$df, paste('results/trace_',start,'_',aggressiveness,'.csv',sep=''))
+#   }
+# }
 
-# various physical distancing strategies (+isolation)
+# # various physical distancing strategies (+isolation)
 
-starts <- c(7, 17, 37)
-after_act_rates <- c(4, 8)
+# starts <- c(7, 17, 37)
+# after_act_rates <- c(4, 8)
 
-for (start in starts){
-  for (after_act_rate in after_act_rates){
-    write_csv(simulate(quar.rate=ramp(1:366, 2, 32, .0333, .3333, .3333), baseline_act_rate=ramp(1:366, start, start+20, 12, after_act_rate, after_act_rate))$df, paste('results/distance_',start,'_',after_act_rate,'.csv',sep=''))
-  }
-}
+# for (start in starts){
+#   for (after_act_rate in after_act_rates){
+#     write_csv(simulate(quar.rate=ramp(1:366, 2, 32, .0333, .3333, .3333), baseline_act_rate=ramp(1:366, start, start+20, 12, after_act_rate, after_act_rate))$df, paste('results/distance_',start,'_',after_act_rate,'.csv',sep=''))
+#   }
+# }
 
-# Various lockdowns
+# # Various lockdowns
 
-starts <- c(7, 17, 37)
-lengths <- c(15, 30, 60)
-after_act_rates <- c(4, 8)
+# starts <- c(7, 17, 37)
+# lengths <- c(15, 30, 60)
+# after_act_rates <- c(4, 8)
 
-for (start in starts){
-  for (length in lengths){
-    for (after_act_rate in after_act_rates){
-      write_csv(simulate(quar.rate=ramp(1:366, 2, 32, .0333, .3333, .3333), baseline_act_rate=lockdown(1:366, start, start+length, 12, 2, after_act_rate))$df, paste('results/lockdown_',start,'_',length,'_',after_act_rate,'.csv',sep=''))
-    }
-  }
-}
+# for (start in starts){
+#   for (length in lengths){
+#     for (after_act_rate in after_act_rates){
+#       write_csv(simulate(quar.rate=ramp(1:366, 2, 32, .0333, .3333, .3333), baseline_act_rate=lockdown(1:366, start, start+length, 12, 2, after_act_rate))$df, paste('results/lockdown_',start,'_',length,'_',after_act_rate,'.csv',sep=''))
+#     }
+#   }
+# }
 
-# contact tracing + physical distancing (+isolation)
-starts <- c(7, 17)
-aggressiveness_vals <- c(3,5,10,20)
-after_act_rates <- c(4, 8)
+# # contact tracing + physical distancing (+isolation)
+# starts <- c(7, 17)
+# aggressiveness_vals <- c(3,5,10,20)
+# after_act_rates <- c(4, 8)
 
-for (start in starts){
-  for (aggressiveness in aggressiveness_vals){
-    for (after_act_rate in after_act_rates){
-      write_csv(simulate(quar.rate=ramp(1:366, 2, 32, .0333, .3333, .3333), baseline_act_rate=ramp(1:366, start, start+20, 12, after_act_rate, after_act_rate), con.agg=ramp(1:366, start, start+20, 0, aggressiveness, aggressiveness))$df, paste('results/trace_and_distance_',start,'_',aggressiveness,'_',after_act_rate,'.csv',sep=''))
-    }
-  }
-}
+# for (start in starts){
+#   for (aggressiveness in aggressiveness_vals){
+#     for (after_act_rate in after_act_rates){
+#       write_csv(simulate(quar.rate=ramp(1:366, 2, 32, .0333, .3333, .3333), baseline_act_rate=ramp(1:366, start, start+20, 12, after_act_rate, after_act_rate), con.agg=ramp(1:366, start, start+20, 0, aggressiveness, aggressiveness))$df, paste('results/trace_and_distance_',start,'_',aggressiveness,'_',after_act_rate,'.csv',sep=''))
+#     }
+#   }
+# }
 
 
