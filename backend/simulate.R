@@ -1,29 +1,20 @@
-## ----installation, include=FALSE, eval=TRUE--------------------------------------------
-for (pkg in c("tidyverse", "magrittr", "lubridate", "knitr", 
-              "gt", "devtools", "DiagrammeR", "EpiModel", 
-              "parallel", "foreach", "tictoc", "patchwork", "future")) 
-  if (!requireNamespace(pkg)) install.packages(pkg)
-
-if (!requireNamespace("gt")) install_github("gt")
-
-
 ## ----setup, include=FALSE, eval=TRUE---------------------------------------------------
 knitr::opts_chunk$set(echo = FALSE, cache=TRUE,
                       tidy.opts=list(width.cutoff=60),
                       tidy=TRUE)
 
-library(tidyverse)
-library(patchwork)
-library(magrittr)
-library(lubridate)
-library(knitr)
-library(gt)
-library(tictoc)
+suppressMessages(library(tidyverse, quietly = T))
+suppressMessages(library(patchwork))
+suppressMessages(library(magrittr))
+suppressMessages(library(lubridate))
+suppressMessages(library(knitr))
+suppressMessages(library(gt))
+suppressMessages(library(tictoc))
 suppressMessages(library(EpiModel))
-library(DiagrammeR)
-library(devtools)
-library(parallel)
-library(foreach)
+suppressMessages(library(DiagrammeR))
+suppressMessages(library(devtools))
+suppressMessages(library(parallel))
+suppressMessages(library(foreach))
 
 tic()
 
@@ -209,13 +200,8 @@ simulate <- function(# control.icm params
 ## ---- echo=TRUE, eval=TRUE-------------------------------------------------------------
 baseline_sim <- simulate()
 
-
 ## --------------------------------------------------------------------------------------
-print(baseline_sim$df[366,"f.num"])
-
-
-## --------------------------------------------------------------------------------------
-write_csv(baseline_sim$df, 'results/baseline.csv')
+cat(format_csv(baseline_sim$df))
 
 
 # ## ---- echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE------------------------------

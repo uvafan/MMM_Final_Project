@@ -2,6 +2,7 @@ import React, {useState, useEffect} from 'react';
 import { API_URL } from './constants';
 import LineChart from './LineChart';
 import { makeStyles } from '@material-ui/core/styles';
+import LinearProgress from '@material-ui/core/LinearProgress';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -25,6 +26,7 @@ const InteractiveSimulator = () => {
   // TODO: Add Tooltip text
   // TODO: Change defaults, step, ranges
   const [jsonData, setJsonData] = useState({});
+  const [loading, setLoading] = useState(false);
   const [isolationMultiplier, setIsolationMultiplier] = React.useState(1);
   const [contactTracingMultiplier, setContactTracingMultiplier] = React.useState(1);
   const [physicalDistancingMultiplier, setPhysicalDistancingMultiplier] = React.useState(1);
@@ -37,6 +39,7 @@ const InteractiveSimulator = () => {
   const sliderClasses = sliderStyles();
 
   useEffect(() => {
+    setLoading(true);
     const postData = {
       isolationMultiplier, 
       contactTracingMultiplier, 
@@ -50,9 +53,11 @@ const InteractiveSimulator = () => {
       .then(res => res.json())
       .then(
         (result) => {
+          setLoading(false);
           setJsonData(result);
         },
         (error) => {
+          setLoading(false);
           console.log(error);
         },
       )
@@ -161,7 +166,7 @@ const InteractiveSimulator = () => {
         />
       </div>
       </Box>
-      <LineChart jsonData={jsonData}/>
+      {loading ? <LinearProgress /> : <LineChart jsonData={jsonData}/>}
     </>
   );
 }

@@ -20,10 +20,8 @@ def compute_dataset():
     mask = request.form.get('maskMultiplier', 1)
 
     # Example script run
-    result = subprocess.run(['cat', 'sample.csv'], stdout=subprocess.PIPE).stdout.decode('utf-8') # type = cat but for windows
-    # result = subprocess.run(['cmd', '/c', 'type', 'sample.csv'], stdout=subprocess.PIPE).stdout.decode('utf-8') # type = cat but for windows
-    # result = subprocess.run(['cmd', '/c', 'Rscript', 'simulate.R', 
-    #                       isolation, contact_tracing, physical_distancing, hospital_capacity, lockdown_days, lockdown_start, mask], stdout=subprocess.PIPE).stdout.decode('utf-8') 
+    # result = subprocess.run(['cat', 'sample.csv'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+    result = subprocess.run(['Rscript', 'simulate.R', str(isolation), str(contact_tracing), str(physical_distancing), str(hospital_capacity), str(lockdown_days), str(lockdown_start), str(mask)], stdout=subprocess.PIPE).stdout.decode('utf-8') 
     
     # Convert to JSON
     dct = {}
@@ -32,10 +30,10 @@ def compute_dataset():
     for row in csv_reader:
         for key in row:
             try:
-                row[key] = int(row[key])
+                row[key] = int(float(row[key]))
             except:
                 row[key] = 0
-        del row[""]
+        if "" in row: del row[""]
         dct[int(row['time'])] = row
     return jsonify(dct)
 
