@@ -303,7 +303,12 @@ baseline_sim <- simulate(ncores=1)
 ```
 
 ```{r}
-write_csv(baseline_sim$df, 'baseline.csv')
+print(baseline_sim$df[366,"f.num"])
+```
+
+
+```{r}
+write_csv(baseline_sim$df, 'results/baseline.csv')
 ```
 
 
