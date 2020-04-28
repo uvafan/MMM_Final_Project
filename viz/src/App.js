@@ -72,77 +72,111 @@ const App = () => {
     setMobileOpen(!mobileOpen);
   };
 
+  const pages = [
+    {
+      'path': '/',
+      'title': 'Introduction',
+      'icon': <DvrRoundedIcon />,
+    },
+    {
+      'path': '/background',
+      'title': 'Background',
+      'icon': <AssignmentRoundedIcon />,
+    },
+    {
+      'path': '/interactive-model',
+      'title': 'Interactive Model',
+      'icon': <AssessmentRoundedIcon />,
+    },
+    {
+      'path': '/results',
+      'title': 'Results',
+      'icon': <AssignmentTurnedInRoundedIcon />,
+    },
+    {
+      'path': '/credits',
+      'title': 'Credits',
+      'icon': <BookRoundedIcon />,
+    },
+  ]
   const drawer = (
     <div>
       <div className={classes.toolbar} />
       <Divider />
       <List>
-        {['Motivation', 'Initial Analysis', 'Interactive Model', 'Results', 'Credits'].map((text, index) => (
-          <ListItem button key={text}>
-            <ListItemIcon>
-              {[<DvrRoundedIcon />, <AssignmentRoundedIcon />, <AssessmentRoundedIcon />, <AssignmentTurnedInRoundedIcon />, <BookRoundedIcon />][index]}
-            </ListItemIcon>
-            <ListItemText primary={text} />
-          </ListItem>
+        {pages.map((page) => (
+          <Link to={page.path} key={page.title} style={{ textDecoration: 'none', color: 'inherit'}}>
+            <ListItem button>
+              <ListItemIcon>
+                {page.icon}
+              </ListItemIcon>
+                <ListItemText primary={page.title} />
+            </ListItem>
+          </Link>
         ))}
       </List>
     </div>
   );
 
   return (
-    <div className={classes.root}>
-      <CssBaseline />
-      <AppBar position="fixed" className={classes.appBar}>
-        <Toolbar>
-          <IconButton
-            onClick={handleDrawerToggle}
-            className={classes.menuButton}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap>
-            Covid-19 Visualizer
-          </Typography>
-        </Toolbar>
-      </AppBar>
-      <nav className={classes.drawer}>
-        <Hidden smUp implementation="css">
-          <Drawer
-            container={window.document.body}
-            variant="temporary"
-            anchor={theme.direction === 'rtl' ? 'right' : 'left'}
-            open={mobileOpen}
-            onClose={handleDrawerToggle}
-            classes={{
-              paper: classes.drawerPaper,
-            }}
-            ModalProps={{
-              keepMounted: true, // Better open performance on mobile.
-            }}
-          >
-            {drawer}
-          </Drawer>
-        </Hidden>
-        <Hidden xsDown implementation="css">
-          <Drawer
-            classes={{
-              paper: classes.drawerPaper,
-            }}
-            variant="permanent"
-            open
-          >
-            {drawer}
-          </Drawer>
-        </Hidden>
-      </nav>
-      <main className={classes.content}>
-        <div className={classes.toolbar} />
-        <Container maxWidth="md">
-          <InteractiveSimulator />
-        </Container>
-      </main>
-    </div>
-      
+    <Router>
+      <div className={classes.root}>
+        <CssBaseline />
+        <AppBar position="fixed" className={classes.appBar}>
+          <Toolbar>
+            <IconButton
+              onClick={handleDrawerToggle}
+              className={classes.menuButton}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography variant="h6" noWrap>
+              Covid-19 Visualizer
+            </Typography>
+          </Toolbar>
+        </AppBar>
+        <nav className={classes.drawer}>
+          <Hidden smUp implementation="css">
+            <Drawer
+              container={window.document.body}
+              variant="temporary"
+              anchor={theme.direction === 'rtl' ? 'right' : 'left'}
+              open={mobileOpen}
+              onClose={handleDrawerToggle}
+              classes={{
+                paper: classes.drawerPaper,
+              }}
+              ModalProps={{
+                keepMounted: true, // Better open performance on mobile.
+              }}
+            >
+              {drawer}
+            </Drawer>
+          </Hidden>
+          <Hidden xsDown implementation="css">
+            <Drawer
+              classes={{
+                paper: classes.drawerPaper,
+              }}
+              variant="permanent"
+              open
+            >
+              {drawer}
+            </Drawer>
+          </Hidden>
+        </nav>
+        <main className={classes.content}>
+          <div className={classes.toolbar} />
+          <Switch>
+              <Route path={pages[2].path}>
+                <Container maxWidth="md">
+                  <InteractiveSimulator />
+                </Container>
+              </Route>
+          </Switch>
+        </main>
+      </div>
+    </Router>
   );
 }
 
