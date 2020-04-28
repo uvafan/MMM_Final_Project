@@ -11,17 +11,24 @@ CORS(app)
 def compute_dataset():
     # Extract fields
     # TODO: Set defaults
-    isolation = request.form.get('isolationMultiplier', 1)
-    contact_tracing = request.form.get('contactTracingMultiplier', 1)
-    physical_distancing = request.form.get('physicalDistancingMultiplier', 1)
-    hospital_capacity = request.form.get('hospitalCapacity', 1)
-    lockdown_days = request.form.get('lockdownDays', 1)
-    lockdown_start = request.form.get('lockdownStart', 1)
-    mask = request.form.get('maskMultiplier', 1)
+    isolation = str(request.form.get('isolation', 0))
+    isolationEnd = str(request.form.get('isolationEnd', 0))
+    isolationCompliance = str(request.form.get('isolationCompliance', 0))
+    physDist = str(request.form.get('physDist', 0))
+    physDistStart = str(request.form.get('physDistStart', 0))
+    physDistAfterActRate = str(request.form.get('physDistAfterActRate', 0))
+    physDistLength = str(request.form.get('physDistLength', 0))
+    lockdown = str(request.form.get('lockdown', 0))
+    lockdownStart = str(request.form.get('lockdownStart', 0))
+    lockdownAfterActRate = str(request.form.get('lockdownAfterActRate', 0))
+    contactTracing = str(request.form.get('contactTracing', 0))
+    contactTracingStart = str(request.form.get('contactTracingStart', 0))
+    contactTracingAggressiveness = str(request.form.get('contactTracingAggressiveness', 0))
 
     # Example script run
     # result = subprocess.run(['cat', 'sample.csv'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-    result = subprocess.run(['Rscript', 'simulate.R', str(isolation), str(contact_tracing), str(physical_distancing), str(hospital_capacity), str(lockdown_days), str(lockdown_start), str(mask)], stdout=subprocess.PIPE).stdout.decode('utf-8') 
+    result = subprocess.run(['Rscript', 'simulate.R', isolation, isolationEnd, isolationCompliance, physDist, physDistStart, physDistAfterActRate, 
+        physDistLength, lockdown, lockdownStart, lockdownAfterActRate, contactTracing, contactTracingStart, contactTracingAggressiveness], stdout=subprocess.PIPE).stdout.decode('utf-8') 
     
     # Convert to JSON
     dct = {}

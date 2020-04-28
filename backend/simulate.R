@@ -278,9 +278,8 @@ if(do_contact_tracing == 1) {
 sim_results <- simulate(quar.rate=quar_rate, baseline_act_rate=base_act_rate, con.agg=con_agg)
 
 ## --------------------------------------------------------------------------------------
-
-print(sim_results$df[366, 'f.num'])
-# cat(format_csv(sim_results$df))
+# print(sim_results$df[366, 'f.num'])
+cat(format_csv(sim_results$df))
 
 
 # ## ---- echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE------------------------------
