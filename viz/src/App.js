@@ -26,7 +26,7 @@ import {
   Link
 } from "react-router-dom";
 import Introduction from './Introduction';
-import Background from './Background';
+import Methods from './Methods';
 import InteractiveSimulator from './InteractiveSimulator';
 import Results from './Results';
 import Credits from './Credits';
@@ -82,8 +82,8 @@ const App = () => {
       'icon': <DvrRoundedIcon />,
     },
     {
-      'path': '/background',
-      'title': 'Background',
+      'path': '/methods',
+      'title': 'Methods',
       'icon': <AssignmentRoundedIcon />,
     },
     {
@@ -175,7 +175,7 @@ const App = () => {
                 <Introduction />
               </Route>
               <Route path={pages[1].path}>
-                <Background />
+                <Methods />
               </Route>
               <Route path={pages[2].path}>
                 <InteractiveSimulator />
