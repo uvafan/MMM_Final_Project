@@ -302,6 +302,11 @@ simulate <- function(# control.icm params
 baseline_sim <- simulate(ncores=1)
 ```
 
+```{r}
+write_csv(baseline_sim$df, 'baseline.csv')
+```
+
+
 Let's visualise the results as a set of time-series of the daily count of our 100,000 individuals in each compartment.
 
 
