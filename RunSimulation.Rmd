@@ -1,0 +1,356 @@
+---
+title: COVOID: A flexible, freely available stochastic individual contact model for exploring COVID-19 intervention and control strategies
+author: Tim Churches
+date: '2020-03-30'
+slug: covoid-simulating-covid-19-interventions-with-r
+categories:
+  - R Language
+  - Guest Post
+  - Applications
+  - Medicine
+  - Data Science
+tags:
+  - R Language
+  - Covid-19
+  - coronavirus
+  - epidemiology
+draft: yes
+output:
+  html_document:
+    self_contained: true
+---
+
+
+```{r installation, include=FALSE, eval=TRUE}
+for (pkg in c("tidyverse", "magrittr", "lubridate", "knitr", 
+              "gt", "devtools", "DiagrammeR", "EpiModel", 
+              "parallel", "foreach", "tictoc", "patchwork")) 
+  if (!requireNamespace(pkg)) install.packages(pkg)
+
+if (!requireNamespace("gt")) install_github("gt")
+```
+
+```{r setup, include=FALSE, eval=TRUE}
+knitr::opts_chunk$set(echo = FALSE, cache=TRUE,
+                      tidy.opts=list(width.cutoff=60),
+                      tidy=TRUE)
+
+library(tidyverse)
+library(patchwork)
+library(magrittr)
+library(lubridate)
+library(knitr)
+library(gt)
+library(tictoc)
+suppressMessages(library(EpiModel))
+library(DiagrammeR)
+library(devtools)
+library(parallel)
+library(foreach)
+
+tic()
+```
+
+
+
+```{r, echo=FALSE, eval=TRUE, message=FALSE, layout="l-page"}
+grViz("
+digraph SEIQHRF {
+
+  # a 'graph' statement
+  graph [overlap = false, fontsize = 10] #, rankdir = LR]
+
+  # several 'node' statements
+  node [shape = box,
+        fontname = Helvetica]
+  S[label='S=Susceptible'];
+  P[label='P=Preventative Isolation, \n not infected and not infectious', color='green'];
+  E[label='E=Exposed and infected,\nasymptomatic,\npotentially infectious'];
+  I[label='I=Symptomatic and/or test-positive,\ninfected and infectious'];
+  Q[label='Q=Case isolated\n(infectious)'];
+  H[label='H=Requires\nhospitalisation\n(hospitalised if\ncapacity not exceeded'];
+  R[label='R=Recovered/immune'];
+  F[label='F=Case fatality']
+  A[label='A=Asymptomatic Isolation, \n infected, isolated', color='green']
+  # several 'edge' statements
+  S->E
+  I->S[style='dashed']
+  E->I
+  E->S[style='dashed']
+  I->Q
+  Q->S[style='dashed']
+  I->R
+  I->H
+  H->F
+  H->R
+  Q->R
+  Q->H
+  P->A[color='green']
+  E->R[color='green']
+  S->P[color='green']
+  P->S[color='green']
+  E->A[color='green']
+  A->Q[color='green']
+  A->R[color='green']
+  A->S[color='green',style='dashed']
+  I->P[color='green',style='dashed']
+  E->P[color='green',style='dashed']
+  A->P[color='green',style='dashed']
+  Q->P[color='green',style='dashed']
+}
+")
+```
+
+# Baseline simulation
+
+First we'll run a baseline simulation for a hypothetical population of 1,000,000 people, in which there are just 30 infectious COVID-19 cases at the outset. We'll run it for 365 days, and we'll set a very low rate at which infectious individuals enter case isolation (thereby dramatically lowering their rate of interactions with others) after they become symptomatic (or have been tested and found positive), and thus aware of their infectivity. Because it is stochastic, the simulation is run eight times, using parallel processing if available, and the results averaged.
+
+```{r, echo=FALSE, eval=TRUE, message=FALSE}
+source_files <- c("_icm.mod.init.seiqhrf.R",
+                  "_icm.mod.status.seiqhrf.R",
+                  "_icm.mod.vital.seiqhrf.R",
+                  "_icm.control.seiqhrf.R",
+                  "_icm.utils.seiqhrf.R",
+                  "_icm.saveout.seiqhrf.R",
+                  "_icm.icm.seiqhrf.R")
+
+src_path <- paste0("")
+
+#gist_url <- "https://gist.github.com/timchurches/92073d0ea75cfbd387f91f7c6e624bd7"
+
+local_source <- TRUE
+
+for (source_file in source_files) {
+  if (local_source) {
+    source(paste(src_path, source_file, sep=""))
+  } else {
+    source_gist(gist_url, filename=source_file)
+  }
+}
+```
+
+```{r, echo=FALSE, eval=TRUE}
+# function to set-up and run the baseline simulations
+
+hc_scaler <- 1 # 1 for 10,000 pop, 10 for 100,000 pop, 100 for 1,000,000 pop
+baseline_act_rate_ei <- 12
+
+simulate <- function(# control.icm params
+                     type = "SEIQHRFPA", 
+                     nsteps = 366, 
+                     nsims = 3,
+                     ncores = 1,
+                     prog.rand = FALSE,
+                     rec.rand = FALSE,
+                     fat.rand = FALSE, # TRUE,
+                     quar.rand = FALSE,
+                     hosp.rand = FALSE,
+                     disch.rand = FALSE,
+                     infection.FUN = infection.seiqhrf.icm,
+                     recovery.FUN = progress.seiqhrf.icm,
+                     departures.FUN = departures.seiqhrf.icm,
+                     arrivals.FUN = arrivals.icm,
+                     get_prev.FUN = get_prev.seiqhrf.icm,
+                     # init.icm params
+                     s.num = 9997, # 999970
+                     e.num= 0,
+                     i.num = 3, # 30
+                     q.num = 0,
+                     h.num = 0,
+                     r.num = 0,
+                     f.num = 0,
+                     p.num = 0,
+                     a.num = 0,
+                     # param.icm params
+                     inf.prob.e = 0.02, 
+                     act.rate.e = baseline_act_rate_ei, # 10,
+                     inf.prob.i = 0.05, 
+                     act.rate.i = baseline_act_rate_ei, # 10,
+                     inf.prob.q = 0.05,
+                     act.rate.q = baseline_act_rate_ei/4,
+                     inf.prob.a = 0.02, #NEW
+                     act.rate.a = baseline_act_rate_ei/4, #NEW
+                     inf.prob.ep = 0.02, 
+                     act.rate.ep = baseline_act_rate_ei/2, # 10,
+                     inf.prob.ip = 0.05, 
+                     act.rate.ip = baseline_act_rate_ei/2, # 10,
+                     inf.prob.qp = 0.05, 
+                     act.rate.qp = baseline_act_rate_ei/8, 
+                     inf.prob.ap = 0.02, #NEW
+                     act.rate.ap = baseline_act_rate_ei/8, #NEW
+                     quar.rate = 1/30,
+                     hosp.rate = 1/100,
+                     disch.rate = 1/20,
+                     prog.rate = 1/10,
+                     prog.dist.scale = 5,
+                     prog.dist.shape = 1.5,
+                     rec.rate = 1/20,
+                     rec.dist.scale = 35,
+                     rec.dist.shape = 1.5,
+                     rec.rate.e = 1/10, #NEW Odds each day that an asymptomatic person recovers
+                     rec.e.dist.scale = 5, #NEW
+                     rec.e.dist.shape = 1.5, #NEW
+                     fat.rate.base = 1/40,
+                     hosp.cap = 30*hc_scaler, # 4000 replace red ref line too
+                     fat.rate.overcap = 1/20,
+                     fat.tcoeff = 0.5,
+                     vital = TRUE,
+                     a.rate = (10.5/365)/1000, 
+                     a.prop.e = 0.01,
+                     a.prop.i = 0.001,
+                     a.prop.q = 0.01,
+                     ds.rate = (7/365)/1000, 
+                     de.rate = (7/365)/1000, 
+                     di.rate = (7/365)/1000,
+                     dq.rate = (7/365)/1000,
+                     dh.rate = (20/365)/1000,
+                     dr.rate = (7/365)/1000,
+                     con.agg = 0,
+                     con.acc = .07,
+                     con.dist.scale = 14,
+                     con.dist.shape = 5,
+                     prog.a.dist.scale = 5,
+                     prog.a.dist.shape = 1.5,
+                     rec.a.dist.scale = 5,
+                     rec.a.dist.shape = 1.5,
+                     out="mean"
+                    ) {
+
+  control <- control.icm(type = type, 
+                         nsteps = nsteps, 
+                         nsims = nsims,
+                         ncores = ncores,
+                         prog.rand = prog.rand,
+                         rec.rand = rec.rand,
+                         infection.FUN = infection.FUN,
+                         recovery.FUN = recovery.FUN,
+                         arrivals.FUN = arrivals.FUN,
+                         departures.FUN = departures.FUN,
+                         get_prev.FUN = get_prev.FUN)
+
+  init <- init.icm(s.num = s.num,
+                   e.num = e.num,
+                   i.num = i.num,
+                   q.num = q.num,
+                   h.num = h.num,
+                   r.num = r.num,
+                   f.num = f.num,
+                   p.num = p.num,
+                   a.num = a.num)
+
+  param <-  param.icm(inf.prob.e = inf.prob.e, 
+                      act.rate.e = act.rate.e,
+                      inf.prob.i = inf.prob.i, 
+                      act.rate.i = act.rate.i,
+                      inf.prob.q = inf.prob.q, 
+                      act.rate.q = act.rate.q,
+                      inf.prob.a = inf.prob.a, 
+                      act.rate.a = act.rate.a,
+                      inf.prob.ep = inf.prob.ep, 
+                      act.rate.ep = act.rate.ep,
+                      inf.prob.ip = inf.prob.ip, 
+                      act.rate.ip = act.rate.ip, 
+                      inf.prob.qp = inf.prob.qp, 
+                      act.rate.qp = act.rate.qp, 
+                      inf.prob.ap = inf.prob.ap,
+                      act.rate.ap = act.rate.ap, 
+                      quar.rate = quar.rate,
+                      hosp.rate = hosp.rate,
+                      disch.rate = disch.rate,
+                      prog.rate = prog.rate,
+                      prog.dist.scale = prog.dist.scale,
+                      prog.dist.shape = prog.dist.shape,
+                      rec.rate = rec.rate,
+                      rec.dist.scale = rec.dist.scale,
+                      rec.dist.shape = rec.dist.shape,
+                      rec.rate.e = rec.rate.e, #NEW gotta put this here too
+                      rec.e.dist.shape = rec.e.dist.shape, #NEW
+                      rec.e.dist.scale = rec.e.dist.scale, #NEW
+                      fat.rate.base = fat.rate.base,
+                      hosp.cap = hosp.cap,
+                      fat.rate.overcap = fat.rate.overcap,
+                      fat.tcoeff = fat.tcoeff,
+                      vital = vital,
+                      a.rate = a.rate, 
+                      a.prop.e = a.prop.e,
+                      a.prop.i = a.prop.i,
+                      a.prop.q = a.prop.q,
+                      ds.rate = ds.rate, 
+                      de.rate = de.rate, 
+                      di.rate = di.rate,
+                      dq.rate = dq.rate,
+                      dh.rate = dh.rate,
+                      dr.rate = dr.rate,
+                      con.agg = con.agg,
+                      con.acc = con.acc,
+                      con.dist.scale = con.dist.scale,
+                      con.dist.shape = con.dist.shape,
+                      prog.a.dist.scale = prog.a.dist.scale,
+                      prog.a.dist.shape = prog.a.dist.shape,
+                      rec.a.dist.scale = rec.a.dist.scale,
+                      rec.a.dist.shape = rec.a.dist.shape
+                      )
+
+  sim <- icm.seiqhrf(param, init, control)
+  sim_df <- as.data.frame(sim, out=out)
+
+  return(list(sim=sim, df=sim_df))
+}
+```
+
+```{r, echo=TRUE, eval=TRUE}
+baseline_sim <- simulate(ncores=1)
+```
+
+Let's visualise the results as a set of time-series of the daily count of our 100,000 individuals in each compartment.
+
+
+```{r, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
+baseline_plot_df <- baseline_sim$df %>%
+  # use only the prevalence columns
+  select(time, s.num, e.num, i.num, q.num, 
+         h.num, r.num, f.num, p.num, a.num) %>%
+  pivot_longer(-c(time),
+               names_to="compartment",
+               values_to="count") %>%
+  filter(time <= 250)
+
+
+# define a standard set of colours to represent compartments
+compcols <- c("s.num" = "yellow", "e.num" = "orange", "i.num" = "red",
+              "q.num" = "cyan", "h.num" = "magenta", "r.num" = "lightgreen",
+              "f.num" = "black", "p.num" = "blue", "a.num" = "green")
+complabels <- c("s.num" = "Susceptible", "e.num" = "Infected/asymptomatic", 
+                "i.num" = "Infected/infectious", "q.num" = "Isolated",
+                "h.num" = "Requires hospitalisation", "r.num" = "Recovered",
+                "f.num" = "Deaths due to COVID-19", "p.num" = "Isolated, not infected", "a.num" = "Isolated, infected, asymptomatic")
+
+baseline_plot_df %>%
+  # examine only the first 100 days since it
+  # is all over by then using the default parameters
+  filter(time <= 150) %>%
+  ggplot(aes(x=time, y=count, colour=compartment)) +
+    geom_line(size=2, alpha=0.5) +
+    scale_colour_manual(values = compcols, labels=complabels) +
+    theme_minimal() +
+    labs(title="Baseline simulation",
+         x="Days since beginning of epidemic",
+         y="Prevalence (persons)")
+```
+
+OK, that looks very reasonable. Note that almost the entire population ends up being infected. However, the **S** and **R** compartments dominate the plot (which is good, because it means humanity will survive!), so let's re-plot leaving out those compartments so we can see a bit more detail.
+
+```{r, echo=FALSE, eval=TRUE, message=FALSE, warning=FALSE}
+baseline_plot_df %>%
+  filter(compartment %in% c("e.num","i.num",
+                            "q.num","h.num",
+                            "f.num", "p.num", "a.num")) %>%
+  filter(time <= 150) %>%
+  ggplot(aes(x=time, y=count, colour=compartment)) +
+    geom_line(size=2, alpha=0.5) +
+    scale_colour_manual(values = compcols, labels=complabels) +
+    theme_minimal() +
+    labs(title="Baseline simulation",
+         x="Days since beginning of epidemic",
+         y="Prevalence (persons)")
+```
