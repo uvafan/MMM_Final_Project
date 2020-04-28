@@ -8,8 +8,9 @@ gpg --keyserver keyserver.ubuntu.com --recv-key E298A3A825C0D65DFD57CBB651716619
 gpg -a --export E084DAB9 | sudo apt-key add -
 sudo apt-get update
 sudo apt-get upgrade
-sudo apt-get install r-base r-base-dev
+sudo apt-get install r-base r-base-dev nginx
 sudo Rscript install.R 
+sudo apt install python3-pip gunicorn3
 pip3 install -r requirements.txt
 ```
 
@@ -20,7 +21,7 @@ python3 server.py
 
 ## Prod
 ```
-gunicorn -w 4 -b 127.0.0.1:80 server:app
+gunicorn3 -w 4 -b 127.0.0.1:80 server:app
 ```
 
 ## Connect to AWS instance:
