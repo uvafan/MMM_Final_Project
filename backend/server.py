@@ -7,16 +7,17 @@ import csv
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/dataset', methods=['GET'])
+@app.route('/dataset', methods=['POST'])
 def compute_dataset():
     # Extract fields
-    isolation_multiplier = request.form.get('isolation_multiplier')
-    contact_tracing_multiplier = request.form.get('contact_tracing_multiplier')
-    physical_distancing_multiplier = request.form.get('physical_distancing_multiplier')
-    hospital_capacity = request.form.get('hospital_capacity')
-    lockdown_days = request.form.get('lockdown_days')
-    lockdown_start = request.form.get('lockdown_start')
-    mask_multiplier = request.form.get('mask_multiplier')
+    # TODO: Set defaults
+    isolation_multiplier = request.form.get('isolationMultiplier', 1)
+    contact_tracing_multiplier = request.form.get('contactTracingMultiplier', 1)
+    physical_distancing_multiplier = request.form.get('physicalDistancingMultiplier', 1)
+    hospital_capacity = request.form.get('hospitalCapacity', 1)
+    lockdown_days = request.form.get('lockdownDays', 1)
+    lockdown_start = request.form.get('lockdownStart', 1)
+    mask_multiplier = request.form.get('maskMultiplier', 1)
 
     # Example script run
     result = subprocess.run(['cmd', '/c', 'type', 'sample.csv'], stdout=subprocess.PIPE).stdout.decode('utf-8') # type = cat but for windows
