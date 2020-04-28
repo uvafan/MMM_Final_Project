@@ -30,6 +30,7 @@ const LineChart = ({jsonData}) => {
   });
   
   const options = {
+    aspectRatio: 1.5,
     responsive: true,
     title: {
       display: true,
@@ -62,7 +63,7 @@ const LineChart = ({jsonData}) => {
     labels,
     datasets,
   };
-  return <Line data={data} options={options}/>;
+  return <Line data={data} options={options} height={null} width={null}/>;
 }
 
 export default LineChart;
