@@ -133,12 +133,12 @@ for (source_file in source_files) {
 # function to set-up and run the baseline simulations
 
 hc_scaler <- 1 # 1 for 10,000 pop, 10 for 100,000 pop, 100 for 1,000,000 pop
-baseline_act_rate_ei <- 12
+baseline_act_rate <- 12
 
 simulate <- function(# control.icm params
                      type = "SEIQHRFPA", 
                      nsteps = 366, 
-                     nsims = 3,
+                     nsims = 1,
                      ncores = 1,
                      prog.rand = FALSE,
                      rec.rand = FALSE,
@@ -152,9 +152,9 @@ simulate <- function(# control.icm params
                      arrivals.FUN = arrivals.icm,
                      get_prev.FUN = get_prev.seiqhrf.icm,
                      # init.icm params
-                     s.num = 9997, # 999970
+                     s.num = 9996, # 999970
                      e.num= 0,
-                     i.num = 3, # 30
+                     i.num = 4, # 30
                      q.num = 0,
                      h.num = 0,
                      r.num = 0,
@@ -162,22 +162,9 @@ simulate <- function(# control.icm params
                      p.num = 0,
                      a.num = 0,
                      # param.icm params
-                     inf.prob.e = 0.02, 
-                     act.rate.e = baseline_act_rate_ei, # 10,
-                     inf.prob.i = 0.05, 
-                     act.rate.i = baseline_act_rate_ei, # 10,
-                     inf.prob.q = 0.05,
-                     act.rate.q = baseline_act_rate_ei/4,
-                     inf.prob.a = 0.02, #NEW
-                     act.rate.a = baseline_act_rate_ei/4, #NEW
-                     inf.prob.ep = 0.02, 
-                     act.rate.ep = baseline_act_rate_ei/2, # 10,
-                     inf.prob.ip = 0.05, 
-                     act.rate.ip = baseline_act_rate_ei/2, # 10,
-                     inf.prob.qp = 0.05, 
-                     act.rate.qp = baseline_act_rate_ei/8, 
-                     inf.prob.ap = 0.02, #NEW
-                     act.rate.ap = baseline_act_rate_ei/8, #NEW
+                     inf.prob.low = 0.02,
+                     inf.prob.high = 0.05,
+                     baseline_act_rate = 12,
                      quar.rate = 1/30,
                      hosp.rate = 1/100,
                      disch.rate = 1/20,
@@ -238,22 +225,23 @@ simulate <- function(# control.icm params
                    p.num = p.num,
                    a.num = a.num)
 
-  param <-  param.icm(inf.prob.e = inf.prob.e, 
-                      act.rate.e = act.rate.e,
-                      inf.prob.i = inf.prob.i, 
-                      act.rate.i = act.rate.i,
-                      inf.prob.q = inf.prob.q, 
-                      act.rate.q = act.rate.q,
-                      inf.prob.a = inf.prob.a, 
-                      act.rate.a = act.rate.a,
-                      inf.prob.ep = inf.prob.ep, 
-                      act.rate.ep = act.rate.ep,
-                      inf.prob.ip = inf.prob.ip, 
-                      act.rate.ip = act.rate.ip, 
-                      inf.prob.qp = inf.prob.qp, 
-                      act.rate.qp = act.rate.qp, 
-                      inf.prob.ap = inf.prob.ap,
-                      act.rate.ap = act.rate.ap, 
+  param <-  param.icm(
+                      inf.prob.e = inf.prob.low, 
+                     act.rate.e = baseline_act_rate, # 10,
+                     inf.prob.i = inf.prob.high, 
+                     act.rate.i = baseline_act_rate, # 10,
+                     inf.prob.q = inf.prob.high,
+                     act.rate.q = baseline_act_rate/4,
+                     inf.prob.a = inf.prob.low, #NEW
+                     act.rate.a = baseline_act_rate/4, #NEW
+                     inf.prob.ep = inf.prob.low, 
+                     act.rate.ep = baseline_act_rate/2, # 10,
+                     inf.prob.ip = inf.prob.high, 
+                     act.rate.ip = baseline_act_rate/2, # 10,
+                     inf.prob.qp = inf.prob.high, 
+                     act.rate.qp = baseline_act_rate/8, 
+                     inf.prob.ap = inf.prob.low, #NEW
+                     act.rate.ap = baseline_act_rate/8, #NEW
                       quar.rate = quar.rate,
                       hosp.rate = hosp.rate,
                       disch.rate = disch.rate,
@@ -299,7 +287,7 @@ simulate <- function(# control.icm params
 ```
 
 ```{r, echo=TRUE, eval=TRUE}
-baseline_sim <- simulate(ncores=1)
+baseline_sim <- simulate()
 ```
 
 ```{r}
@@ -355,6 +343,49 @@ baseline_plot_df %>%
   filter(compartment %in% c("e.num","i.num",
                             "q.num","h.num",
                             "f.num", "p.num", "a.num")) %>%
+filter(time <= 150) %>%
+  ggplot(aes(x=time, y=count, colour=compartment)) +
+    geom_line(size=2, alpha=0.5) +
+    scale_colour_manual(values = compcols, labels=complabels) +
+    theme_minimal() +
+    labs(title="Baseline simulation",
+         x="Days since beginning of epidemic",
+         y="Prevalence (persons)")
+```
+
+
+```{r}
+# Those who feel symptoms isolate at a higher rate as awareness spreads
+isolation_ramp <- function(t) {
+  ifelse(t <= 2, 0.0333, ifelse(t <= 17, 0.0333 + (t-3)*(0.3333 - 0.03333)/15, 0.3333))
+}
+
+isolation_awareness <- simulate(quar.rate=isolation_ramp(1:366))
+print(isolation_awareness$df[366,"f.num"])
+```
+```{r}
+baseline_plot_df <- isolation_awareness$df %>%
+  # use only the prevalence columns
+  select(time, s.num, e.num, i.num, q.num, 
+         h.num, r.num, f.num, p.num, a.num) %>%
+  pivot_longer(-c(time),
+               names_to="compartment",
+               values_to="count") %>%
+  filter(time <= 250)
+
+
+# define a standard set of colours to represent compartments
+compcols <- c("s.num" = "yellow", "e.num" = "orange", "i.num" = "red",
+              "q.num" = "cyan", "h.num" = "magenta", "r.num" = "lightgreen",
+              "f.num" = "black", "p.num" = "blue", "a.num" = "green")
+complabels <- c("s.num" = "Susceptible", "e.num" = "Infected/asymptomatic", 
+                "i.num" = "Infected/infectious", "q.num" = "Isolated",
+                "h.num" = "Requires hospitalisation", "r.num" = "Recovered",
+                "f.num" = "Deaths due to COVID-19", "p.num" = "Isolated, not infected", "a.num" = "Isolated, infected, asymptomatic")
+
+baseline_plot_df %>%
+  # examine only the first 100 days since it
+  # is all over by then using the default parameters
   filter(time <= 150) %>%
   ggplot(aes(x=time, y=count, colour=compartment)) +
     geom_line(size=2, alpha=0.5) +
@@ -364,3 +395,117 @@ baseline_plot_df %>%
          x="Days since beginning of epidemic",
          y="Prevalence (persons)")
 ```
+
+```{r}
+baseline_plot_df %>%
+  filter(compartment %in% c("e.num","i.num",
+                            "q.num","h.num",
+                            "f.num", "p.num", "a.num")) %>%
+filter(time <= 150) %>%
+  ggplot(aes(x=time, y=count, colour=compartment)) +
+    geom_line(size=2, alpha=0.5) +
+    scale_colour_manual(values = compcols, labels=complabels) +
+    theme_minimal() +
+    labs(title="Baseline simulation",
+         x="Days since beginning of epidemic",
+         y="Prevalence (persons)")
+```
+
+
+```{r}
+# ramp up contact tracing beginning on day 5
+agg_ramp <- function(t) {
+  ifelse(t <= 7, 0, ifelse(t <= 27, (t-8)*10/20, 10))
+}
+
+tracing <- simulate(quar.rate=isolation_ramp(1:366), con.agg=agg_ramp(1:366))
+print(tracing$df[366,"f.num"])
+```
+
+```{r}
+# ramp up physical distancing beginning on day 5 for 50 days
+phys_dist_ramp <- function(t) {
+  ifelse(t<=57, ifelse(t <= 7, 12, ifelse(t <= 27, 12 - (t-8)*8/20, 4)), 12)
+}
+
+phys_dist <- simulate(quar.rate=isolation_ramp(1:366), baseline_act_rate=phys_dist_ramp(1:366))
+print(phys_dist$df[366,"f.num"])
+```
+```{r}
+# ramp up physical distancing beginning on day 15 for 50 days
+phys_dist_ramp_15 <- function(t) {
+  ifelse(t<=67, ifelse(t <= 17, 12, ifelse(t <= 37, 12 - (t-18)*8/20, 4)), 12)
+}
+
+phys_dist_15 <- simulate(quar.rate=isolation_ramp(1:366), baseline_act_rate=phys_dist_ramp_15(1:366))
+print(phys_dist_15$df[366,"f.num"])
+```
+```{r}
+# Lockdown lasting for 30 days starting at day 15
+lockdown30day <- function(t) {
+  ifelse(t<=47, ifelse(t <= 17, 12, 2), 12)
+}
+
+lock30day <- simulate(quar.rate=isolation_ramp(1:366), baseline_act_rate=lockdown30day(1:366))
+print(lock30day$df[366,"f.num"])
+```
+
+```{r}
+# Lockdown lasting for 30 days starting at day 15
+lockdown30daydist <- function(t) {
+  ifelse(t<=47, ifelse(t <= 17, 12, 2), 4)
+}
+
+lock30daydist <- simulate(quar.rate=isolation_ramp(1:366), baseline_act_rate=lockdown30daydist(1:366))
+print(lock30daydist$df[366,"f.num"])
+```
+
+
+```{r}
+baseline_plot_df <- lock30daydist$df %>%
+  # use only the prevalence columns
+  select(time, s.num, e.num, i.num, q.num, 
+         h.num, r.num, f.num, p.num, a.num) %>%
+  pivot_longer(-c(time),
+               names_to="compartment",
+               values_to="count") %>%
+  filter(time <= 250)
+
+
+# define a standard set of colours to represent compartments
+compcols <- c("s.num" = "yellow", "e.num" = "orange", "i.num" = "red",
+              "q.num" = "cyan", "h.num" = "magenta", "r.num" = "lightgreen",
+              "f.num" = "black", "p.num" = "blue", "a.num" = "green")
+complabels <- c("s.num" = "Susceptible", "e.num" = "Infected/asymptomatic", 
+                "i.num" = "Infected/infectious", "q.num" = "Isolated",
+                "h.num" = "Requires hospitalisation", "r.num" = "Recovered",
+                "f.num" = "Deaths due to COVID-19", "p.num" = "Isolated, not infected", "a.num" = "Isolated, infected, asymptomatic")
+
+baseline_plot_df %>%
+  # examine only the first 100 days since it
+  # is all over by then using the default parameters
+  filter(time <= 150) %>%
+  ggplot(aes(x=time, y=count, colour=compartment)) +
+    geom_line(size=2, alpha=0.5) +
+    scale_colour_manual(values = compcols, labels=complabels) +
+    theme_minimal() +
+    labs(title="Baseline simulation",
+         x="Days since beginning of epidemic",
+         y="Prevalence (persons)")
+```
+```{r}
+baseline_plot_df %>%
+  filter(compartment %in% c("e.num","i.num",
+                            "q.num","h.num",
+                            "f.num", "p.num", "a.num")) %>%
+filter(time >= 50 & time <= 100) %>%
+  ggplot(aes(x=time, y=count, colour=compartment)) +
+    geom_line(size=2, alpha=0.5) +
+    scale_colour_manual(values = compcols, labels=complabels) +
+    theme_minimal() +
+    labs(title="Baseline simulation",
+         x="Days since beginning of epidemic",
+         y="Prevalence (persons)")
+```
+
+
