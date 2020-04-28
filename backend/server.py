@@ -1,9 +1,11 @@
 import flask
 from flask import Flask, request, jsonify
+from flask_cors import CORS, cross_origin
 import subprocess
 import csv
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/dataset', methods=['GET'])
 def compute_dataset():
