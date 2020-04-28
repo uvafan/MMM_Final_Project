@@ -80,7 +80,7 @@ const InteractiveSimulator = () => {
           step={1}
           min={1}
           max={10}
-          onChange={(event, newValue) => {setIsolationMultiplier(newValue);}}
+          onChangeCommitted={(event, newValue) => {setIsolationMultiplier(newValue);}}
         />
         <Typography>
           Contact Tracing Multiplier
@@ -92,7 +92,7 @@ const InteractiveSimulator = () => {
           step={1}
           min={1}
           max={10}
-          onChange={(event, newValue) => {setContactTracingMultiplier(newValue);}}
+          onChangeCommitted={(event, newValue) => {setContactTracingMultiplier(newValue);}}
         />
         <Typography>
           Physical Distancing Multiplier
@@ -104,7 +104,7 @@ const InteractiveSimulator = () => {
           step={1}
           min={1}
           max={10}
-          onChange={(event, newValue) => {setPhysicalDistancingMultiplier(newValue);}}
+          onChangeCommitted={(event, newValue) => {setPhysicalDistancingMultiplier(newValue);}}
         />
         <Typography>
           Hospital Capacity
@@ -116,7 +116,7 @@ const InteractiveSimulator = () => {
           step={1}
           min={1}
           max={10}
-          onChange={(event, newValue) => {setHospitalCapacity(newValue);}}
+          onChangeCommitted={(event, newValue) => {setHospitalCapacity(newValue);}}
         />
       </div>
       <div className={containerClasses.root}>
@@ -130,7 +130,7 @@ const InteractiveSimulator = () => {
           step={1}
           min={1}
           max={10}
-          onChange={(event, newValue) => {setLockdownDays(newValue);}}
+          onChangeCommitted={(event, newValue) => {setLockdownDays(newValue);}}
         />
         <Typography>
           Lockdown Start
@@ -142,7 +142,7 @@ const InteractiveSimulator = () => {
           step={1}
           min={1}
           max={10}
-          onChange={(event, newValue) => {setLockdownStart(newValue);}}
+          onChangeCommitted={(event, newValue) => {setLockdownStart(newValue);}}
         />
         <Typography>
           Mask Multiplier
@@ -154,7 +154,7 @@ const InteractiveSimulator = () => {
           step={1}
           min={1}
           max={10}
-          onChange={(event, newValue) => {setMaskMultiplier(newValue);}}
+          onChangeCommitted={(event, newValue) => {setMaskMultiplier(newValue);}}
         />
       </div>
       
