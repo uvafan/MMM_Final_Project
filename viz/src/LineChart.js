@@ -1,8 +1,8 @@
 import React from 'react';
 import './App.css';
 import {Line} from 'react-chartjs-2';
-import { STATE_MAPPING, STATES} from './constants'
-import { generateColor } from './utils'
+import { STATE_MAPPING, STATES } from './constants';
+import { generateColor } from './utils';
 
 const LineChart = ({jsonData}) => {
   var labels = [...Array(Object.keys(jsonData).length).keys()];
