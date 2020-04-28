@@ -8,16 +8,17 @@ import Box from '@material-ui/core/Box';
 import Tooltip from '@material-ui/core/Tooltip';
 import Slider from '@material-ui/core/Slider';
 
-const containerStyles = makeStyles({
-  root: {
+const styles = makeStyles({
+  titleClasses: {
+    textAlign: 'center',
+  },
+  sliderContainerClasses: {
     width: '50%',
     display: 'inline-block',
-    verticalAlign: "top",
+    verticalAlign: 'top',
+    textAlign: 'center',
   },
-});
-
-const sliderStyles = makeStyles({
-  root: {
+  sliderClasses: {
     width: '90%',
   },
 });
@@ -35,8 +36,7 @@ const InteractiveSimulator = () => {
   const [lockdownStart, setLockdownStart] = React.useState(1);
   const [maskMultiplier, setMaskMultiplier] = React.useState(1);
 
-  const containerClasses = containerStyles();
-  const sliderClasses = sliderStyles();
+  const classes = styles();
 
   useEffect(() => {
     setLoading(true);
@@ -72,7 +72,7 @@ const InteractiveSimulator = () => {
   ]);
   
   const sliderProps = {
-    className: sliderClasses.root,
+    className: classes.sliderClasses,
     valueLabelDisplay: "auto",
   }
 
@@ -86,11 +86,11 @@ const InteractiveSimulator = () => {
   
   return (
     <>
-      <Typography variant="h2">
+      <Typography variant="h2" className={classes.titleClasses}>
         Interactive Simulator
       </Typography>
       <Box my={4}>
-      <div className={containerClasses.root}>
+      <div className={classes.sliderContainerClasses}>
         <SliderTitle label="Isolation Multiplier" tooltipText="Add" />
         <Slider
           {...sliderProps}
@@ -132,7 +132,7 @@ const InteractiveSimulator = () => {
           onChangeCommitted={(event, newValue) => {setLockdownStart(newValue);}}
         />
       </div>
-      <div className={containerClasses.root}>
+      <div className={classes.sliderContainerClasses}>
         
         <SliderTitle label="Contact Tracing Multiplier" tooltipText="Add" />
         <Slider
