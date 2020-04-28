@@ -7,10 +7,20 @@ sudo echo "deb http://cran.rstudio.com/bin/linux/ubuntu bionic-cran35/" | sudo t
 gpg --keyserver keyserver.ubuntu.com --recv-key E298A3A825C0D65DFD57CBB651716619E084DAB9
 gpg -a --export E084DAB9 | sudo apt-key add -
 sudo apt-get update
+sudo apt-get upgrade
 sudo apt-get install r-base r-base-dev
-Rscript install.R 
+sudo Rscript install.R 
 pip3 install -r requirements.txt
+```
+
+## Dev
+```
 python3 server.py
+```
+
+## Prod
+```
+gunicorn -w 4 -b 127.0.0.1:80 server:app
 ```
 
 ## Connect to AWS instance:
