@@ -5,8 +5,14 @@ export const styles = makeStyles({
     textAlign: "center",
   },
   imageClasses: {
-    width: "100%",
-    padding: "2% 20%",
+    width: "60%",
+  },
+  imageGridClasses: {
+    width: "50%",
+    padding: "1%",
+  },
+  imageContainerClasses: {
+    textAlign: "Center",
   },
   sliderContainerClasses: {
     width: "50%",

@@ -45,19 +45,25 @@ const Methods = () => {
       <Typography variant="body1" gutterBottom>
         Tim Churches extended SIR to SEIQHRF for COVID-19 intervention modeling.
         He open sourced
+        {' '}
         <Link href="https://gist.github.com/timchurches/92073d0ea75cfbd387f91f7c6e624bd7">
           his code
         </Link>
+        {' '}
         and wrote a
+        {' '}
         <Link href="https://timchurches.github.io/blog/posts/2020-03-18-modelling-the-effects-of-public-health-interventions-on-covid-19-transmission-part-2/">
           blog post
         </Link>
+        {' '}
         describing the extension. The transition diagram for the SEIQHRF model
         is shown in the image below:
       </Typography>
 
-      <img src={SEIQHRF} className={classes.imageClasses} />
-
+      <div className={classes.imageContainerClasses}>
+        <img src={SEIQHRF} className={classes.imageClasses} />
+      </div>
+      
       <Typography variant="body1" gutterBottom>
         The dotted lines represent infection pathways between compartments, and
         the solid lines represent movement from one compartment to the other.
@@ -96,7 +102,9 @@ const Methods = () => {
         green, is shown below:
       </Typography>
 
-      <img src={SEIQHRFPA} className={classes.imageClasses} />
+      <div className={classes.imageContainerClasses}>
+        <img src={SEIQHRFPA} className={classes.imageClasses} />
+      </div>
 
       <Typography variant="body1" gutterBottom>
         The two components of our extension are:

@@ -9,9 +9,6 @@ const Introduction = () => {
   return (
     <Container maxWidth="md">
       <Typography variant="h2" className={classes.titleClasses}>
-        COVIM because we KARE
-      </Typography>
-      <Typography variant="h4" className={classes.titleClasses}>
         COVID-19 Visualization and Intervention Modeling
       </Typography>
       <Typography variant="h6" className={classes.titleClasses}>

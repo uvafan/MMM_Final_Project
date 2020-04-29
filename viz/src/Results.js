@@ -47,7 +47,9 @@ const Results = () => {
         to get a closer look at the curves.
       </Typography>
 
-      <img src={baseline} className={classes.imageClasses} />
+      <div className={classes.imageContainerClasses}>
+        <img src={baseline} className={classes.imageClasses} />
+      </div>
 
       <Typography variant="h4" gutterBottom>
         Isolation of infected
@@ -63,8 +65,10 @@ const Results = () => {
         flattened all of the curves.
       </Typography>
 
-      <img src={isol1} className={classes.imageClasses} />
-      <img src={isol2} className={classes.imageClasses} />
+      <div className={classes.imageContainerClasses}>
+        <img src={isol1} className={classes.imageGridClasses} />
+        <img src={isol2} className={classes.imageGridClasses} />
+      </div>
 
       <Typography variant="body1" gutterBottom>
         We modeled the ramping up to a transition rate of ⅔ per day more slowly,
@@ -72,7 +76,9 @@ const Results = () => {
         wasn’t a significant difference in the number of deaths.
       </Typography>
 
-      <img src={isol3} className={classes.imageClasses} />
+      <div className={classes.imageContainerClasses}>
+        <img src={isol3} className={classes.imageClasses} />
+      </div>
 
       <Typography variant="body1" gutterBottom>
         All subsequent interventions include isolation of symptomatic infected
@@ -88,16 +94,19 @@ const Results = () => {
       <Typography variant="body1" gutterBottom>
         Lockdowns were simulated by severely lowering the number of interactions for a set number of days, and then returning to a level between the baseline and the lockdown rate.  Lockdowns need to be long enough to lower the number of those infected to a low number before physical distancing becomes effective.
       </Typography>
-
-      <img src={lock1} className={classes.imageClasses} />
-      <img src={lock2} className={classes.imageClasses} />
-      <img src={lock3} className={classes.imageClasses} />
+      <div className={classes.imageContainerClasses}>
+        <img src={lock1} className={classes.imageGridClasses} />
+        <img src={lock2} className={classes.imageGridClasses} />
+        <img src={lock3} className={classes.imageGridClasses} />
+      </div>
 
       <Typography variant="body1" gutterBottom>
         The length of the lockdown does not significantly influence the number of deaths as long as it is sufficiently long to reduce the number of cases down to a small number. However, if physical distancing is not followed sufficiently well after the lockdown, the number of cases will spike again.
       </Typography>
-      
-      <img src={lock4} className={classes.imageClasses} />
+
+      <div className={classes.imageContainerClasses}>
+        <img src={lock4} className={classes.imageClasses} />
+      </div>
 
       <Typography variant="h4" gutterBottom>
         Physical Distancing
@@ -107,12 +116,14 @@ const Results = () => {
         Physical distancing was modeled by gradually reducing the number of interactions down to a set amount, then remaining there for the rest of the simulation. We found that beginning physical distancing early (while the number infected was low) reduced the number of deaths significantly, but it was significantly less effective once the infections were already skyrocketing. However, even when suppression was impossible, stronger physical distancing allowed herd immunity to be achieved with a lower percentage of the population infected.
       </Typography>
       
-      <img src={phys3} className={classes.imageClasses} />
-      <img src={phys2} className={classes.imageClasses} />
-      <img src={phys1} className={classes.imageClasses} />
-      <img src={phys4} className={classes.imageClasses} />
-      <img src={phys5} className={classes.imageClasses} />
-      <img src={phys6} className={classes.imageClasses} />
+      <div className={classes.imageContainerClasses}>
+        <img src={phys3} className={classes.imageGridClasses} />
+        <img src={phys2} className={classes.imageGridClasses} />
+        <img src={phys1} className={classes.imageGridClasses} />
+        <img src={phys4} className={classes.imageGridClasses} />
+        <img src={phys5} className={classes.imageGridClasses} />
+        <img src={phys6} className={classes.imageGridClasses} />
+      </div>
 
       <Typography variant="h4" gutterBottom>
         Contact Tracing
@@ -121,15 +132,19 @@ const Results = () => {
       <Typography variant="body1" gutterBottom>
         We modeled contact tracing by having each new symptomatic case cause a certain number of asymptomatic people to go into quarantine. We find that early aggressive contract tracing is the most effective at reducing total deaths. Isolated susceptible cases were omitted from the graphs to better visualize the other curves.
       </Typography>
-      
-      <img src={trace1} className={classes.imageClasses} />
-      <img src={trace2} className={classes.imageClasses} />
+
+      <div className={classes.imageContainerClasses}>
+        <img src={trace1} className={classes.imageGridClasses} />
+        <img src={trace2} className={classes.imageGridClasses} />
+      </div>
 
       <Typography variant="body1" gutterBottom>
         With the same level of aggressiveness of enforcing contact tracing, delaying the start of contract tracing to day 35 almost doubles the number of deaths compared to starting contact tracing on day 5. 
       </Typography>
 
-      <img src={trace3} className={classes.imageClasses} />
+      <div className={classes.imageContainerClasses}>
+        <img src={trace3} className={classes.imageClasses} />
+      </div>
 
       <Typography variant="h4" gutterBottom>
         Contact Tracing + Physical Distancing
@@ -138,10 +153,11 @@ const Results = () => {
       <Typography variant="body1" gutterBottom>
         With the best physical distancing and contact tracing situations, the number of infected and the number of death cases are significantly lower, compared to only using the best contact tracing intervention. Similarly, the number of infected and the number of death cases are lower compared to only using the best physical distancing intervention.  These two interventions work well together to reduce the number of deaths by approximately half compared to just one of the two being applied.
       </Typography>
-      
-      <img src={comb1} className={classes.imageClasses} />
-      <img src={comb2} className={classes.imageClasses} />
-      <img src={comb3} className={classes.imageClasses} />
+      <div className={classes.imageContainerClasses}>
+        <img src={comb1} className={classes.imageGridClasses} />
+        <img src={comb2} className={classes.imageGridClasses} />
+        <img src={comb3} className={classes.imageGridClasses} />
+      </div>
     </Container>
   );
 };
