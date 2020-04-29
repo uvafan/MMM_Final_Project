@@ -119,7 +119,7 @@ const Results = () => {
       </Typography>
 
       <Typography variant="body1" gutterBottom>
-        We modeled contact tracing by having each new symptomatic case cause a certain number of asymptomatic people to go into quarantine. We find that early aggressive contract tracing is the most effective at reducing total deaths. 
+        We modeled contact tracing by having each new symptomatic case cause a certain number of asymptomatic people to go into quarantine. We find that early aggressive contract tracing is the most effective at reducing total deaths. Isolated susceptible cases were omitted from the graphs to better visualize the other curves.
       </Typography>
       
       <img src={trace1} className={classes.imageClasses} />
