@@ -117,10 +117,10 @@ const InteractiveSimulator = () => {
             {...sliderProps}
             disabled={isolation === 0}
             marks
-            defaultValue={0.1}
+            defaultValue={0.5}
             step={0.1}
             min={0.1}
-            max={0.8}
+            max={0.9}
             onChangeCommitted={(event, newValue) => {
               setIsolationCompliance(newValue);
             }}
@@ -130,7 +130,7 @@ const InteractiveSimulator = () => {
             {...sliderProps}
             disabled={isolation === 0}
             marks
-            defaultValue={10}
+            defaultValue={30}
             step={5}
             min={10}
             max={50}
@@ -155,7 +155,7 @@ const InteractiveSimulator = () => {
             {...sliderProps}
             disabled={lockdown === 0}
             marks
-            defaultValue={5}
+            defaultValue={15}
             step={5}
             min={5}
             max={40}
@@ -181,7 +181,7 @@ const InteractiveSimulator = () => {
             {...sliderProps}
             disabled={lockdown === 0}
             marks
-            defaultValue={14}
+            defaultValue={21}
             step={7}
             min={14}
             max={96}
@@ -207,7 +207,7 @@ const InteractiveSimulator = () => {
             {...sliderProps}
             disabled={contactTracing === 0}
             marks
-            defaultValue={5}
+            defaultValue={15}
             step={5}
             min={5}
             max={40}
@@ -248,7 +248,7 @@ const InteractiveSimulator = () => {
             {...sliderProps}
             disabled={physDist === 0}
             marks
-            defaultValue={5}
+            defaultValue={15}
             step={5}
             min={5}
             max={40}
