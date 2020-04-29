@@ -45,7 +45,7 @@ const Credits = () => {
         their tools for simulating mathematical models of infectious disease
         dynamics in an R package and providing tutorials on their website.
       </Typography>
-      <Typography variant="body1" >
+      <Typography variant="body1">
         For estimating several parameters of our model:
       </Typography>
       <List>
