@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { API_URL } from "./constants";
 import LineChart from "./LineChart";
 import { styles } from "./styles";
@@ -9,6 +9,7 @@ import Box from "@material-ui/core/Box";
 import Tooltip from "@material-ui/core/Tooltip";
 import Slider from "@material-ui/core/Slider";
 import Switch from "@material-ui/core/Switch";
+import Button from '@material-ui/core/Button';
 
 const InteractiveSimulator = () => {
   // TODO: Add Tooltip text
@@ -35,7 +36,7 @@ const InteractiveSimulator = () => {
 
   const classes = styles();
 
-  useEffect(() => {
+  const updateChart = useCallback(() => {
     setLoading(true);
     const postData = {
       isolation,
@@ -70,21 +71,11 @@ const InteractiveSimulator = () => {
           console.log(error);
         }
       );
-  }, [
-    isolation,
-    isolationEnd,
-    isolationCompliance,
-    physDist,
-    physDistStart,
-    physDistAfterActRate,
-    lockdown,
-    lockdownStart,
-    lockdownAfterActRate,
-    lockdownLength,
-    contactTracing,
-    contactTracingStart,
-    contactTracingAggressiveness,
-  ]);
+  });
+
+  useEffect(() => {
+    updateChart();
+  }, []);
 
   const sliderProps = {
     className: classes.sliderClasses,
@@ -295,6 +286,12 @@ const InteractiveSimulator = () => {
           />
         </div>
       </Box>
+      <div className={classes.imageContainerClasses}>
+        <Button variant="contained" color="primary" onClick={updateChart}>
+          Run simulator
+        </Button>
+      </div>
+      <Box pt={4}/>
       {loading ? <LinearProgress /> : <LineChart jsonData={jsonData} />}
     </Container>
   );
