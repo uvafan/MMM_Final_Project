@@ -1,8 +1,7 @@
 import React from "react";
 import "./App.css";
 import { Line } from "react-chartjs-2";
-import { STATE_MAPPING, STATES } from "./constants";
-import { generateColor } from "./utils";
+import { STATE_MAPPING, STATES, COLOR_MAPPING } from "./constants";
 
 const LineChart = ({ jsonData }) => {
   var labels = [...Array(Object.keys(jsonData).length).keys()];
@@ -13,7 +12,7 @@ const LineChart = ({ jsonData }) => {
     for (const i in jsonData) {
       stateData.push(jsonData[i][state + ".num"]);
     }
-    const color = generateColor();
+    const color = COLOR_MAPPING[state];
     datasets.push({
       label: STATE_MAPPING[state],
       fill: false,
