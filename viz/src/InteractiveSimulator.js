@@ -112,7 +112,10 @@ const InteractiveSimulator = () => {
               setIsolation(1 - isolation);
             }}
           />
-          <SliderTitle label="Isolation Compliance" tooltipText="Portion of people who comply with isolating when they are sick" />
+          <SliderTitle
+            label="Isolation Compliance"
+            tooltipText="Rate of transition to isolation for symptomatic people"
+          />
           <Slider
             {...sliderProps}
             disabled={isolation === 0}
@@ -125,7 +128,10 @@ const InteractiveSimulator = () => {
               setIsolationCompliance(newValue);
             }}
           />
-          <SliderTitle label="Days until Full Compliance" tooltipText="Ramp-up speed for isolation compliance" />
+          <SliderTitle
+            label="Days until Full Compliance"
+            tooltipText="Ramp-up speed for isolation compliance"
+          />
           <Slider
             {...sliderProps}
             disabled={isolation === 0}
@@ -150,7 +156,10 @@ const InteractiveSimulator = () => {
               setLockdown(1 - lockdown);
             }}
           />
-          <SliderTitle label="Lockdown Start" tooltipText="Number of days until lockdown starts" />
+          <SliderTitle
+            label="Lockdown Start"
+            tooltipText="Number of days until lockdown starts"
+          />
           <Slider
             {...sliderProps}
             disabled={lockdown === 0}
@@ -163,7 +172,10 @@ const InteractiveSimulator = () => {
               setLockdownStart(newValue);
             }}
           />
-          <SliderTitle label="Lockdown Final Act Rate" tooltipText="Interactions between people after lockdown" />
+          <SliderTitle
+            label="Lockdown Final Act Rate"
+            tooltipText="Interactions between people after lockdown"
+          />
           <Slider
             {...sliderProps}
             disabled={lockdown === 0}
@@ -176,7 +188,10 @@ const InteractiveSimulator = () => {
               setLockdownAfterActRate(newValue);
             }}
           />
-          <SliderTitle label="Lockdown Length" tooltipText="Number of days until lockdown ends" />
+          <SliderTitle
+            label="Lockdown Length"
+            tooltipText="Number of days from lockdown start until lockdown end"
+          />
           <Slider
             {...sliderProps}
             disabled={lockdown === 0}
@@ -202,7 +217,10 @@ const InteractiveSimulator = () => {
               setContactTracing(1 - contactTracing);
             }}
           />
-          <SliderTitle label="Contact Tracing Start" tooltipText="Number of days until contact tracing starts" />
+          <SliderTitle
+            label="Contact Tracing Start"
+            tooltipText="Number of days until contact tracing starts"
+          />
           <Slider
             {...sliderProps}
             disabled={contactTracing === 0}
@@ -243,7 +261,10 @@ const InteractiveSimulator = () => {
               setPhysDist(1 - physDist);
             }}
           />
-          <SliderTitle label="Physical Distancing Start" tooltipText="Number of days until physical distancing starts" />
+          <SliderTitle
+            label="Physical Distancing Start"
+            tooltipText="Number of days until physical distancing starts"
+          />
           <Slider
             {...sliderProps}
             disabled={physDist === 0}
