@@ -134,7 +134,7 @@ const App = () => {
               <MenuIcon />
             </IconButton>
             <Typography variant="h6" noWrap>
-              Covid-19 Visualizer
+              COVIM
             </Typography>
           </Toolbar>
         </AppBar>
