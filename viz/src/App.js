@@ -87,14 +87,14 @@ const App = () => {
       'icon': <AssignmentRoundedIcon />,
     },
     {
-      'path': '/interactive-model',
-      'title': 'Interactive Model',
-      'icon': <AssessmentRoundedIcon />,
-    },
-    {
       'path': '/results',
       'title': 'Results',
       'icon': <AssignmentTurnedInRoundedIcon />,
+    },
+    {
+      'path': '/interactive-model',
+      'title': 'Interactive Model',
+      'icon': <AssessmentRoundedIcon />,
     },
     {
       'path': '/credits',
@@ -178,10 +178,10 @@ const App = () => {
                 <Methods />
               </Route>
               <Route path={pages[2].path}>
-                <InteractiveSimulator />
+                <Results />
               </Route>
               <Route path={pages[3].path}>
-                <Results />
+                <InteractiveSimulator />
               </Route>
               <Route path={pages[4].path}>
                 <Credits />
