@@ -4,7 +4,9 @@ import { Line } from "react-chartjs-2";
 import { STATE_MAPPING, STATES, COLOR_MAPPING } from "./constants";
 
 const LineChart = ({ jsonData }) => {
-  var labels = [...Array(Object.keys(jsonData).length).keys()];
+  // TODO: fix me
+  // var labels = [...Array(Object.keys(jsonData).length).keys()];
+  var labels = [...Array(200).keys()];
 
   var datasets = [];
   STATES.forEach((state) => {
