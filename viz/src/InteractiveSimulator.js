@@ -112,19 +112,6 @@ const InteractiveSimulator = () => {
               setIsolation(1 - isolation);
             }}
           />
-          <SliderTitle label="Isolation End" tooltipText="Add" />
-          <Slider
-            {...sliderProps}
-            disabled={isolation === 0}
-            marks
-            defaultValue={10}
-            step={5}
-            min={10}
-            max={50}
-            onChangeCommitted={(event, newValue) => {
-              setIsolationEnd(newValue);
-            }}
-          />
           <SliderTitle label="Isolation Compliance" tooltipText="Add" />
           <Slider
             {...sliderProps}
@@ -136,6 +123,19 @@ const InteractiveSimulator = () => {
             max={0.8}
             onChangeCommitted={(event, newValue) => {
               setIsolationCompliance(newValue);
+            }}
+          />
+          <SliderTitle label="Full Compliance Date" tooltipText="Add" />
+          <Slider
+            {...sliderProps}
+            disabled={isolation === 0}
+            marks
+            defaultValue={10}
+            step={5}
+            min={10}
+            max={50}
+            onChangeCommitted={(event, newValue) => {
+              setIsolationEnd(newValue);
             }}
           />
         </div>
