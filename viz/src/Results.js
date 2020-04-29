@@ -134,8 +134,7 @@ const Results = () => {
       </Typography>
 
       <div className={classes.imageContainerClasses}>
-        <img src={trace1} className={classes.imageGridClasses} />
-        <img src={trace2} className={classes.imageGridClasses} />
+        <img src={trace2} className={classes.imageClasses} />
       </div>
 
       <Typography variant="body1" gutterBottom>
@@ -143,7 +142,8 @@ const Results = () => {
       </Typography>
 
       <div className={classes.imageContainerClasses}>
-        <img src={trace3} className={classes.imageClasses} />
+        <img src={trace1} className={classes.imageGridClasses} />
+        <img src={trace3} className={classes.imageGridClasses} />
       </div>
 
       <Typography variant="h4" gutterBottom>
