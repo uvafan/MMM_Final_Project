@@ -56,7 +56,7 @@ const Methods = () => {
         is shown in the image below:
       </Typography>
 
-      <img src={SEIQHRF} className={classes.imageClasses}/>
+      <img src={SEIQHRF} className={classes.imageClasses} />
 
       <Typography variant="body1" gutterBottom>
         The dotted lines represent infection pathways between compartments, and
@@ -96,7 +96,7 @@ const Methods = () => {
         green, is shown below:
       </Typography>
 
-      <img src={SEIQHRFPA} className={classes.imageClasses}/>
+      <img src={SEIQHRFPA} className={classes.imageClasses} />
 
       <Typography variant="body1" gutterBottom>
         The two components of our extension are:
