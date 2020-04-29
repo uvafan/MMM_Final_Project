@@ -3,6 +3,7 @@ import Container from "@material-ui/core/Container";
 import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 import { styles } from "./styles";
+import comb3 from "./images/comb3.png";
 
 const Introduction = () => {
   const classes = styles();
@@ -14,6 +15,10 @@ const Introduction = () => {
       <Typography variant="h6" className={classes.titleClasses}>
         By Kiara, Aaron, Rashid, Eli
       </Typography>
+      <Box pt={2} />
+      <div className={classes.imageContainerClasses}>
+        <img src={comb3} className={classes.imageClasses} />
+      </div>
       <Box pt={2} />
       <Typography variant="body1">
         The COVID-19 pandemic poses a serious health risk to people all over the
