@@ -1,4 +1,4 @@
-# COVID-19 Intervention Modeling
+# COVIM: COVID-19 Intervention Modeling
 
 For a full write-up of the methodology and results of the project and an interactive visualization see the website: ourwebsite.com  
 
