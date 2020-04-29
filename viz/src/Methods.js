@@ -126,7 +126,7 @@ const Methods = () => {
         contact tracing, isolating those who have come into contact with
         infected people. We implemented it through the isolation of (on average)
         N asymptomatic people for each person infected at each timestep, where N
-        is a hyperparameter representing the aggressiveness of contact tracing
+        is a parameter representing the aggressiveness of contact tracing
         measures. We assumed that people who were isolated through contact
         tracing had a likelihood of being infected slightly higher than the
         baseline probability of transmission when two individuals meet. People

@@ -10,6 +10,22 @@ import baseline from "./images/baseline.png";
 import isol1 from "./images/isolation_.3_15.png";
 import isol2 from "./images/isolation_.6_15.png";
 import isol3 from "./images/isolation_.6_30.png";
+import lock1 from "./images/lock1.png";
+import lock2 from "./images/lock2.png";
+import lock3 from "./images/lock3.png";
+import lock4 from "./images/lock4.png";
+import phys1 from "./images/phys1.png";
+import phys2 from "./images/phys2.png";
+import phys3 from "./images/phys3.png";
+import phys4 from "./images/phys4.png";
+import phys5 from "./images/phys5.png";
+import phys6 from "./images/phys6.png";
+import trace1 from "./images/trace1.png";
+import trace2 from "./images/trace2.png";
+import trace3 from "./images/trace3.png";
+import comb1 from "./images/comb1.png";
+import comb2 from "./images/comb2.png";
+import comb3 from "./images/comb3.png";
 
 const Results = () => {
   const classes = styles();
@@ -68,6 +84,64 @@ const Results = () => {
       <Typography variant="h4" gutterBottom>
         Lockdown
       </Typography>
+
+      <Typography variant="body1" gutterBottom>
+        Lockdowns were simulated by severely lowering the number of interactions for a set number of days, and then returning to a level between the baseline and the lockdown rate.  Lockdowns need to be long enough to lower the number of those infected to a low number before physical distancing becomes effective.
+      </Typography>
+
+      <img src={lock1} className={classes.imageClasses} />
+      <img src={lock2} className={classes.imageClasses} />
+      <img src={lock3} className={classes.imageClasses} />
+
+      <Typography variant="body1" gutterBottom>
+        The length of the lockdown does not significantly influence the number of deaths as long as it is sufficiently long to reduce the number of cases down to a small number. However, if physical distancing is not followed sufficiently well after the lockdown, the number of cases will spike again.
+      </Typography>
+      
+      <img src={lock4} className={classes.imageClasses} />
+
+      <Typography variant="h4" gutterBottom>
+        Physical Distancing
+      </Typography>
+
+      <Typography variant="body1" gutterBottom>
+        Physical distancing was modeled by gradually reducing the number of interactions down to a set amount, then remaining there for the rest of the simulation. We found that beginning physical distancing early (while the number infected was low) reduced the number of deaths significantly, but it was significantly less effective once the infections were already skyrocketing. However, even when suppression was impossible, stronger physical distancing allowed herd immunity to be achieved with a lower percentage of the population infected.
+      </Typography>
+      
+      <img src={phys3} className={classes.imageClasses} />
+      <img src={phys2} className={classes.imageClasses} />
+      <img src={phys1} className={classes.imageClasses} />
+      <img src={phys4} className={classes.imageClasses} />
+      <img src={phys5} className={classes.imageClasses} />
+      <img src={phys6} className={classes.imageClasses} />
+
+      <Typography variant="h4" gutterBottom>
+        Contact Tracing
+      </Typography>
+
+      <Typography variant="body1" gutterBottom>
+        We modeled contact tracing by having each new symptomatic case cause a certain number of asymptomatic people to go into quarantine. We find that early aggressive contract tracing is the most effective at reducing total deaths. Isolated susceptible cases were omitted from the graphs to better visualize the other curves.
+      </Typography>
+      
+      <img src={trace1} className={classes.imageClasses} />
+      <img src={trace2} className={classes.imageClasses} />
+
+      <Typography variant="body1" gutterBottom>
+        With the same level of aggressiveness of enforcing contact tracing, delaying the start of contract tracing to day 35 almost doubles the number of deaths compared to starting contact tracing on day 5. 
+      </Typography>
+
+      <img src={trace3} className={classes.imageClasses} />
+
+      <Typography variant="h4" gutterBottom>
+        Contact Tracing + Physical Distancing
+      </Typography>
+
+      <Typography variant="body1" gutterBottom>
+        With the best physical distancing and contact tracing situations, the number of infected and the number of death cases are significantly lower, compared to only using the best contact tracing intervention. Similarly, the number of infected and the number of death cases are lower compared to only using the best physical distancing intervention.  These two interventions work well together to reduce the number of deaths by approximately half compared to just one of the two being applied.
+      </Typography>
+      
+      <img src={comb1} className={classes.imageClasses} />
+      <img src={comb2} className={classes.imageClasses} />
+      <img src={comb3} className={classes.imageClasses} />
     </Container>
   );
 };
