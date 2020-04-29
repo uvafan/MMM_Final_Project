@@ -5,8 +5,7 @@ import { STATE_MAPPING, STATES, COLOR_MAPPING } from "./constants";
 
 const LineChart = ({ jsonData }) => {
   // TODO: fix me
-  // var labels = [...Array(Object.keys(jsonData).length).keys()];
-  var labels = [...Array(200).keys()];
+  var labels = [...Array(Object.keys(jsonData).length).keys()];
 
   var datasets = [];
   STATES.forEach((state) => {
