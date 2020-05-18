@@ -93,6 +93,9 @@ const InteractiveSimulator = () => {
       <Typography variant="h2" className={classes.titleClasses}>
         Interactive Simulator
       </Typography>
+      <Typography variant="h6" className={classes.subtitleClasses}>
+        NOTE: The live verson of this simulator was deprecated May 2020. You can find the codebase <a href="https://github.com/uvafan/MMM_Final_Project">here</a>.
+      </Typography>
       <Box my={4}>
         <div className={classes.sliderContainerClasses}>
           <Typography variant="h4">Isolation</Typography>

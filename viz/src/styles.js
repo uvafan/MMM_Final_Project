@@ -4,6 +4,9 @@ export const styles = makeStyles({
   titleClasses: {
     textAlign: "center",
   },
+  subtitleClasses: {
+    textAlign: "center",
+  },
   imageClasses: {
     width: "60%",
   },
